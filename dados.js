@@ -22,12 +22,13 @@ const AGOSTO_DIAS = [
   { dia: 6, dinheiro: 710, pix: 1016.77, credito: 499.37, debito: 562.91, voucher: 0, crediario: 34.1, recebParcDinheiro: 0, recebParcPix: 0 },
   { dia: 7, dinheiro: 865, pix: 1325.2, credito: 1051.97, debito: 545.34, voucher: 0, crediario: 480.29, recebParcDinheiro: 0, recebParcPix: 0 },
   { dia: 8, dinheiro: 0, pix: 0, credito: 0, debito: 0, voucher: 9000, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
+  { dia: 9, dinheiro: 2500, pix: 3200, credito: 5, debito: 120, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
 ].map((d) => ({ ...d, totalVendas: d.dinheiro + d.pix + d.credito + d.debito + d.voucher + d.crediario }));
 
 const AGOSTO_TOTAIS = {
-  dinheiro: 12769.37, pix: 9600.54, credito: 8320.96, debito: 7157.29, voucher: 9700, crediario: 514.39,
+  dinheiro: 15269.37, pix: 12800.54, credito: 8325.96, debito: 7277.29, voucher: 9700, crediario: 514.39,
   recebParcDinheiro: 0, recebParcPix: 0,
-  totalVendas: 48062.55,
+  totalVendas: 53887.55,
 };
 
 const DESPESAS_AGOSTO = [
@@ -42,7 +43,7 @@ const DESPESAS_AGOSTO = [
   { dia: 8, desc: "Máquina Infinity Pay", valor: 199, tipo: "PIX" },
   { dia: 8, desc: "Taxa matança", valor: 513.2, tipo: "PIX" },
   { dia: 9, desc: "Consultoria Aneilton", valor: 2500, tipo: "PIX" },
-  { dia: 9, desc: "Saber", valor: 2500, tipo: "Dinheiro" },
+  { dia: 9, desc: "Saber", valor: 2500, tipo: "PIX" },
   { dia: 3, desc: "Flanelas e canetas", valor: 12.3, tipo: "Dinheiro" },
   { dia: 4, desc: "Segurança VIP", valor: 30, tipo: "Dinheiro" },
   { dia: 5, desc: "Almoço", valor: 23, tipo: "Dinheiro" },
@@ -72,12 +73,12 @@ const COMPRAS_AGOSTO = [
 ];
 
 const FECHAMENTO_AGOSTO = {
-  totalGeral: { dinheiro: 12769.37, pixStone: 9600.54, cartao: 25178.25, total: 47548.16 },
-  despesas: { dinheiro: 2739.6, pixStone: 7041.43, total: 9781.03 },
+  totalGeral: { dinheiro: 15269.37, pixStone: 12800.54, cartao: 25303.25, total: 53373.16 },
+  despesas: { dinheiro: 239.6, pixStone: 9541.43, total: 9781.03 },
   compras: { dinheiro: 2170.8, pixStone: 20665.92, total: 22836.72 },
-  saldo: { dinheiro: 7858.97, pixStone: 7071.44, total: 14930.41 },
+  saldo: { dinheiro: 12858.97, pixStone: 7896.44, total: 20755.41 },
   saldoOnlineContaEm: "07/08",
-  saldoOnline: { dinheiro: 4526, dinheiroDiff: -5637.71, stone: 4766.7, total: 9292.7 },
+  saldoOnline: { dinheiro: 3000, dinheiroDiff: -17755.41, stone: 0, total: 3000 },
 };
 
 const RESUMO_MENSAL = [
