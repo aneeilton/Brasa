@@ -53,10 +53,10 @@ function SectionTitle({ children, sub }) {
 }
 
 function Th({ children, align = "right" }) {
-  return <th style={{ padding: "6px 8px", fontWeight: 500, textAlign: align, fontSize: 12 }}>{children}</th>;
+  return <th style={{ padding: "6px 8px", fontWeight: 500, textAlign: align, fontSize: 12, whiteSpace: "nowrap" }}>{children}</th>;
 }
 function Td({ children, align = "right", style }) {
-  return <td style={{ padding: "8px", textAlign: align, fontFamily: "'Roboto Mono', monospace", ...style }}>{children}</td>;
+  return <td style={{ padding: "8px", textAlign: align, fontFamily: "'Roboto Mono', monospace", whiteSpace: "nowrap", ...style }}>{children}</td>;
 }
 
 /* ---------------- TABS ---------------- */
