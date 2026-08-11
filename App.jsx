@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import {
-  HOJE, AGOSTO_DIAS, AGOSTO_TOTAIS, DESPESAS_AGOSTO, COMPRAS_AGOSTO,
+  HOJE, ULTIMA_ATUALIZACAO, AGOSTO_DIAS, AGOSTO_TOTAIS, DESPESAS_AGOSTO, COMPRAS_AGOSTO,
   FECHAMENTO_AGOSTO, RESUMO_MENSAL, RESUMO_MEDIA, RESUMO_EXTRA,
   CONTAS_A_PAGAR, BOLETOS_A_PAGAR,
 } from "./dados.js";
@@ -78,7 +78,7 @@ function CaixaDoDia() {
   return (
     <div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-        <StatCard label="Quanto entrou no mês" value={AGOSTO_TOTAIS.totalVendas} accent={EMBER} big />
+        <StatCard label="Quanto entrou no mês" value={AGOSTO_TOTAIS.totalVendas} accent={GREEN} big />
         <StatCard label="Dinheiro em caixa hoje" value={FECHAMENTO_AGOSTO.saldo.dinheiro} big />
         <StatCard label="Sobrou no mês (saldo)" value={FECHAMENTO_AGOSTO.saldo.total} accent={GREEN} big />
       </div>
@@ -205,22 +205,22 @@ function CaixaDoDia() {
           </thead>
           <tbody>
             {[
-              ["Total que entrou", FECHAMENTO_AGOSTO.totalGeral.dinheiro, FECHAMENTO_AGOSTO.totalGeral.pixStone, FECHAMENTO_AGOSTO.totalGeral.total],
-              ["Despesas do dia a dia", FECHAMENTO_AGOSTO.despesas.dinheiro, FECHAMENTO_AGOSTO.despesas.pixStone, FECHAMENTO_AGOSTO.despesas.total],
-              ["Compras de mercadoria", FECHAMENTO_AGOSTO.compras.dinheiro, FECHAMENTO_AGOSTO.compras.pixStone, FECHAMENTO_AGOSTO.compras.total],
-            ].map(([label, a, b, c]) => (
+              ["Total que entrou", FECHAMENTO_AGOSTO.totalGeral.dinheiro, FECHAMENTO_AGOSTO.totalGeral.pixStone + FECHAMENTO_AGOSTO.totalGeral.cartao, FECHAMENTO_AGOSTO.totalGeral.total, GREEN],
+              ["Despesas do dia a dia", FECHAMENTO_AGOSTO.despesas.dinheiro, FECHAMENTO_AGOSTO.despesas.pixStone, FECHAMENTO_AGOSTO.despesas.total, EMBER],
+              ["Compras de mercadoria", FECHAMENTO_AGOSTO.compras.dinheiro, FECHAMENTO_AGOSTO.compras.pixStone, FECHAMENTO_AGOSTO.compras.total, EMBER],
+            ].map(([label, a, b, c, cor]) => (
               <tr key={label} style={{ borderBottom: `1px solid ${LINE}` }}>
                 <Td align="left" style={{ color: BONE, fontFamily: "inherit" }}>{label}</Td>
-                <Td>{fmt(a)}</Td>
-                <Td>{fmt(b)}</Td>
-                <Td>{fmt(c)}</Td>
+                <Td style={{ color: cor }}>{fmt(a)}</Td>
+                <Td style={{ color: cor }}>{fmt(b)}</Td>
+                <Td style={{ color: cor }}>{fmt(c)}</Td>
               </tr>
             ))}
             <tr style={{ fontWeight: 700 }}>
-              <Td align="left" style={{ color: EMBER, fontFamily: "inherit" }}>O que sobrou</Td>
-              <Td style={{ color: EMBER }}>{fmt(FECHAMENTO_AGOSTO.saldo.dinheiro)}</Td>
-              <Td style={{ color: EMBER }}>{fmt(FECHAMENTO_AGOSTO.saldo.pixStone)}</Td>
-              <Td style={{ color: EMBER }}>{fmt(FECHAMENTO_AGOSTO.saldo.total)}</Td>
+              <Td align="left" style={{ color: FECHAMENTO_AGOSTO.saldo.total >= 0 ? GREEN : RED, fontFamily: "inherit" }}>O que sobrou</Td>
+              <Td style={{ color: FECHAMENTO_AGOSTO.saldo.dinheiro >= 0 ? GREEN : RED }}>{fmt(FECHAMENTO_AGOSTO.saldo.dinheiro)}</Td>
+              <Td style={{ color: (FECHAMENTO_AGOSTO.saldo.pixStone + FECHAMENTO_AGOSTO.totalGeral.cartao) >= 0 ? GREEN : RED }}>{fmt(FECHAMENTO_AGOSTO.saldo.pixStone + FECHAMENTO_AGOSTO.totalGeral.cartao)}</Td>
+              <Td style={{ color: FECHAMENTO_AGOSTO.saldo.total >= 0 ? GREEN : RED }}>{fmt(FECHAMENTO_AGOSTO.saldo.total)}</Td>
             </tr>
           </tbody>
         </table>
@@ -228,10 +228,10 @@ function CaixaDoDia() {
 
       <SectionTitle sub={`Quanto tem disponível nas contas em ${FECHAMENTO_AGOSTO.saldoOnlineContaEm}`}>Saldo nas contas</SectionTitle>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-        <StatCard label="Dinheiro (sistema)" value={FECHAMENTO_AGOSTO.saldoOnline.dinheiro} />
-        <StatCard label="Diferença a acompanhar" value={FECHAMENTO_AGOSTO.saldoOnline.dinheiroDiff} accent={RED} />
-        <StatCard label="Stone" value={FECHAMENTO_AGOSTO.saldoOnline.stone} />
-        <StatCard label="Total disponível" value={FECHAMENTO_AGOSTO.saldoOnline.total} accent={EMBER} />
+        <StatCard label="Dinheiro (sistema)" value={FECHAMENTO_AGOSTO.saldoOnline.dinheiro} accent={FECHAMENTO_AGOSTO.saldoOnline.dinheiro >= 0 ? GREEN : RED} />
+        <StatCard label="Diferença a acompanhar" value={FECHAMENTO_AGOSTO.saldoOnline.dinheiroDiff} accent={FECHAMENTO_AGOSTO.saldoOnline.dinheiroDiff >= 0 ? GREEN : RED} />
+        <StatCard label="Stone" value={FECHAMENTO_AGOSTO.saldoOnline.stone} accent={FECHAMENTO_AGOSTO.saldoOnline.stone >= 0 ? GREEN : RED} />
+        <StatCard label="Total disponível" value={FECHAMENTO_AGOSTO.saldoOnline.total} accent={FECHAMENTO_AGOSTO.saldoOnline.total >= 0 ? GREEN : RED} />
       </div>
     </div>
   );
@@ -538,6 +538,9 @@ export default function App() {
           <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 30, letterSpacing: "0.04em", margin: 0, color: BONE }}>
             NOTE BRASA NOBRE
           </h1>
+          <span style={{ fontSize: 12, color: BONE_DIM }}>
+            Atualizado em {ULTIMA_ATUALIZACAO.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+          </span>
         </div>
         <div style={{ fontSize: 12, color: BONE_DIM, marginBottom: 16 }}>Painel financeiro · somente leitura</div>
 
