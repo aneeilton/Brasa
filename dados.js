@@ -91,14 +91,14 @@ const RESUMO_MEDIA = { entrada: 103781.92, saida: 14646.8, compras: 72050, saldo
 const RESUMO_EXTRA = { saldoAgo: -15828, debito: -48260, saldoOnline: 5000, aReceber: 3000 };
 
 const CONTAS_A_PAGAR = [
-  { categoria: "Pró-labore (sócios)", planejado: 6000, realizado: 0, itens: ["Jaime — 2.000", "Edcarlos — 2.000", "Fabinho — 2.000"] },
-  { categoria: "Folha de pessoal", planejado: 7058, realizado: 0, itens: ["Jaime Victor — 1.621", "Carla — 1.621", "Jadson — 1.621", "Edson — 1.621", "Hora extra"] },
-  { categoria: "Sistemas", planejado: 287, realizado: 0, itens: ["Sistema Caixa — 287 (trimestral, pago em agosto: 860)"] },
+  { categoria: "Pró-labore (sócios)", planejado: 6000, realizado: 574, itens: ["Jaime — 2.000", "Edcarlos — 2.000", "Fabinho — 2.000"] },
+  { categoria: "Folha de pessoal", planejado: 7058, realizado: 574, itens: ["Jaime Victor — 1.621", "Carla — 1.621", "Jadson — 1.621", "Edson — 1.621", "Hora extra"] },
+  { categoria: "Sistemas", planejado: 287, realizado: 287, itens: ["Sistema Caixa — 287 (trimestral, pago em agosto: 860)"] },
   { categoria: "Serviços prestados", planejado: 1000, realizado: 0, itens: [] },
   { categoria: "Bens duráveis", planejado: 1000, realizado: 0, itens: [] },
   { categoria: "Material de expediente", planejado: 500, realizado: 0, itens: ["Limpeza — 250", "Escritório — 200", "Água — 50"] },
   { categoria: "Impostos e taxas", planejado: 1321.18, realizado: 0, itens: ["DAE — 106,35", "DAS Simples Nacional — 714,83", "Máquina Infinity — 250", "NexfitPay — 250"] },
-  { categoria: "Fixas / consumo", planejado: 4589.34, realizado: 178, itens: ["Aluguel — 3.263,50", "Energia — 862,61", "Água/esgoto — 43,23", "Celular — 60", "Internet — 60", "Contador — 300"] },
+  { categoria: "Fixas / consumo", planejado: 337.26, realizado: 337.26, itens: ["Água/esgoto — 337,26 (pago 09/08)", "Aluguel, Energia, Celular, Internet e Contador — ainda não orçados este mês"] },
   { categoria: "Outros", planejado: 300, realizado: 0, itens: [] },
 ];
 
@@ -106,6 +106,17 @@ const BOLETOS_A_PAGAR = [
   { compra: new Date(2026, 7, 3), fornecedor: "Fornecedor de porco", produto: "Porco", valor: 637.2, vencimento: new Date(2026, 7, 13), pago: false },
   { compra: new Date(2026, 7, 3), fornecedor: "Fornecedor de porco", produto: "Porco", valor: 4312, vencimento: new Date(2026, 7, 13), pago: false },
   { compra: new Date(2026, 7, 4), fornecedor: "Fornecedor de boi", produto: "Boi", valor: 23708, vencimento: new Date(2026, 7, 14), pago: false },
+  { compra: new Date(2026, 7, 9), fornecedor: "Embasa", produto: "Conta de água", valor: 337.26, vencimento: new Date(2026, 7, 9), pago: false },
+  { compra: new Date(2026, 7, 10), fornecedor: "Petropolis", produto: "Cerveja", valor: 144.3, vencimento: new Date(2026, 7, 10), pago: false },
+  { compra: new Date(2026, 7, 10), fornecedor: "Avigro", produto: "Derivados de frango", valor: 154.78, vencimento: new Date(2026, 7, 10), pago: false },
+  { compra: new Date(2026, 7, 10), fornecedor: "Avigro", produto: "Derivados de frango", valor: 324.94, vencimento: new Date(2026, 7, 10), pago: false },
+  { compra: new Date(2026, 7, 11), fornecedor: "BRF", produto: "Derivados de carne", valor: 574.44, vencimento: new Date(2026, 7, 11), pago: false },
+  { compra: new Date(2026, 7, 15), fornecedor: "BRF", produto: "Derivados de carne", valor: 278.39, vencimento: new Date(2026, 7, 15), pago: false },
+  { compra: new Date(2026, 7, 17), fornecedor: "Avigro", produto: "Derivados de frango", valor: 154.84, vencimento: new Date(2026, 7, 17), pago: false },
+  { compra: new Date(2026, 7, 15), fornecedor: "Lucas Argolo", produto: "Boi (48,4 @)", valor: 15004, vencimento: new Date(2026, 7, 15), pago: false },
+  { compra: new Date(2026, 7, 15), fornecedor: "Lucas Argolo", produto: "Banda de boi (113 kg)", valor: 2410, vencimento: new Date(2026, 7, 15), pago: false },
+  { compra: new Date(2026, 7, 15), fornecedor: "Lucas Argolo", produto: "Carneiro (21,1 kg)", valor: 651, vencimento: new Date(2026, 7, 15), pago: false },
+  { compra: new Date(2026, 7, 15), fornecedor: "Lucas Argolo", produto: "Fretes de boi (19 fretes)", valor: 1520, vencimento: new Date(2026, 7, 15), pago: false },
 ];
 
 export {
