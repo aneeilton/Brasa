@@ -10,6 +10,7 @@
 /* Atualizado a partir do arquivo/link enviado. Para atualizar, envie a planilha ou o link de novo. */
 /* "Hoje" usado para calcular vencimentos: */
 const HOJE = new Date(2026, 7, 9); // 9 de agosto de 2026
+const ULTIMA_ATUALIZACAO = new Date(2026, 7, 9); // atualize esta linha toda vez que os dados forem atualizados
 
 /* "Vendido no dia" = Dinheiro + Pix + Crédito + Débito + Voucher + Crediário (bate com a linha RESUMO DIA da planilha). */
 /* recebParc = pagamentos de fiado recebidos no dia — entram no caixa, mas NÃO contam como venda nova (a venda já foi contada quando foi feita a fiado). */
@@ -120,7 +121,7 @@ const BOLETOS_A_PAGAR = [
 ];
 
 export {
-  HOJE, AGOSTO_DIAS, AGOSTO_TOTAIS, DESPESAS_AGOSTO, COMPRAS_AGOSTO,
+  HOJE, ULTIMA_ATUALIZACAO, AGOSTO_DIAS, AGOSTO_TOTAIS, DESPESAS_AGOSTO, COMPRAS_AGOSTO,
   FECHAMENTO_AGOSTO, RESUMO_MENSAL, RESUMO_MEDIA, RESUMO_EXTRA,
   CONTAS_A_PAGAR, BOLETOS_A_PAGAR,
 };
