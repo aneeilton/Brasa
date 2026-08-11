@@ -21,12 +21,14 @@ const AGOSTO_DIAS = [
   { dia: 5, dinheiro: 1699, pix: 1138, credito: 587.78, debito: 904.74, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
   { dia: 6, dinheiro: 710, pix: 1016.77, credito: 499.37, debito: 562.91, voucher: 0, crediario: 34.1, recebParcDinheiro: 0, recebParcPix: 0 },
   { dia: 7, dinheiro: 865, pix: 1325.2, credito: 1051.97, debito: 545.34, voucher: 0, crediario: 480.29, recebParcDinheiro: 0, recebParcPix: 0 },
+  { dia: 8, dinheiro: 3460, pix: 2662.15, credito: 1537.77, debito: 1577.79, voucher: 131.44, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
+  { dia: 9, dinheiro: 1546, pix: 815.22, credito: 420.18, debito: 284.25, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
 ].map((d) => ({ ...d, totalVendas: d.dinheiro + d.pix + d.credito + d.debito + d.voucher + d.crediario }));
 
 const AGOSTO_TOTAIS = {
-  dinheiro: 12769.37, pix: 9600.54, credito: 8320.96, debito: 7157.29, voucher: 700, crediario: 514.39,
+  dinheiro: 17775.37, pix: 13077.91, credito: 10278.91, debito: 9019.33, voucher: 831.44, crediario: 514.39,
   recebParcDinheiro: 0, recebParcPix: 0,
-  totalVendas: 39062.55,
+  totalVendas: 51497.35,
 };
 
 const DESPESAS_AGOSTO = [
@@ -40,6 +42,7 @@ const DESPESAS_AGOSTO = [
   { dia: 7, desc: "Funcionários (Jaime Vitor)", valor: 1559.5, tipo: "PIX" },
   { dia: 8, desc: "Máquina Infinity Pay", valor: 199, tipo: "PIX" },
   { dia: 8, desc: "Taxa matança", valor: 513.2, tipo: "PIX" },
+  { dia: 9, desc: "Vale João Pedro", valor: 250, tipo: "PIX" },
   { dia: 3, desc: "Flanelas e canetas", valor: 12.3, tipo: "Dinheiro" },
   { dia: 4, desc: "Segurança VIP", valor: 30, tipo: "Dinheiro" },
   { dia: 5, desc: "Almoço", valor: 23, tipo: "Dinheiro" },
@@ -69,10 +72,10 @@ const COMPRAS_AGOSTO = [
 ];
 
 const FECHAMENTO_AGOSTO = {
-  totalGeral: { dinheiro: 12769.37, pixStone: 9600.54, cartao: 16178.25, total: 38548.16 },
-  despesas: { dinheiro: 239.6, pixStone: 4541.43, total: 4781.03 },
+  totalGeral: { dinheiro: 17775.37, pixStone: 13077.91, cartao: 20129.68, total: 50982.96 },
+  despesas: { dinheiro: 239.6, pixStone: 4791.43, total: 5031.03 },
   compras: { dinheiro: 2170.8, pixStone: 20665.92, total: 22836.72 },
-  saldo: { dinheiro: 10358.97, pixStone: 571.44, total: 10930.41 },
+  saldo: { dinheiro: 15364.97, pixStone: 3798.81, total: 23115.21 },
   saldoOnlineContaEm: "07/08",
   saldoOnline: { dinheiro: 4526, dinheiroDiff: -1637.71, stone: 4766.7, total: 9292.7 },
 };
