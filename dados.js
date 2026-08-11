@@ -74,12 +74,19 @@ const COMPRAS_AGOSTO = [
 
 const FECHAMENTO_AGOSTO = {
   totalGeral: { dinheiro: 17775.37, pixStone: 13077.91, cartao: 20129.68, total: 50982.96 },
-  despesas: { dinheiro: 239.6, pixStone: 4791.43, total: 5031.03 },
-  compras: { dinheiro: 2170.8, pixStone: 20665.92, total: 22836.72 },
-  saldo: { dinheiro: 15364.97, pixStone: 3798.81, total: 23115.21 },
+  despesas: { dinheiro: 239.6, pixStone: 5503.63, total: 5743.23 },
+  compras: { dinheiro: 2170.8, pixStone: 20775.92, total: 22946.72 },
+  saldo: { dinheiro: 15364.97, pixStone: 6928.04, total: 22293.01 },
   saldoOnlineContaEm: "07/08",
   saldoOnline: { dinheiro: 4526, dinheiroDiff: -1637.71, stone: 4766.7, total: 9292.7 },
 };
+
+/* Transferências entre o dinheiro físico (caixa) e o saldo em conta.
+   tipo "deposito" = dinheiro saiu do caixa físico e entrou na conta.
+   tipo "saque" = dinheiro saiu da conta e entrou no caixa físico. */
+const TRANSFERENCIAS_ESPECIE_CONTA = [
+  { dia: 7, valor: 2519.4, tipo: "deposito" },
+];
 
 const RESUMO_MENSAL = [
   { mes: "Março", entrada: 41876, saida: 5922, compras: 56810, saldo: -20856 },
@@ -122,6 +129,6 @@ const BOLETOS_A_PAGAR = [
 
 export {
   HOJE, ULTIMA_ATUALIZACAO, AGOSTO_DIAS, AGOSTO_TOTAIS, DESPESAS_AGOSTO, COMPRAS_AGOSTO,
-  FECHAMENTO_AGOSTO, RESUMO_MENSAL, RESUMO_MEDIA, RESUMO_EXTRA,
+  FECHAMENTO_AGOSTO, TRANSFERENCIAS_ESPECIE_CONTA, RESUMO_MENSAL, RESUMO_MEDIA, RESUMO_EXTRA,
   CONTAS_A_PAGAR, BOLETOS_A_PAGAR,
 };
