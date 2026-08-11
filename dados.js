@@ -78,7 +78,7 @@ const FECHAMENTO_AGOSTO = {
   compras: { dinheiro: 2170.8, pixStone: 20775.92, total: 22946.72 },
   saldo: { dinheiro: 15364.97, pixStone: 6928.04, total: 22293.01 },
   saldoOnlineContaEm: "07/08",
-  saldoOnline: { dinheiro: 4526, dinheiroDiff: -1637.71, stone: 4766.7, total: 9292.7 },
+  saldoOnline: { dinheiro: 7045.4, dinheiroDiff: -1637.71, stone: 2247.3, total: 9292.7 },
 };
 
 /* Transferências entre o dinheiro físico (caixa) e o saldo em conta.
