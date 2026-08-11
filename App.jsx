@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import {
   HOJE, ULTIMA_ATUALIZACAO, AGOSTO_DIAS, AGOSTO_TOTAIS, DESPESAS_AGOSTO, COMPRAS_AGOSTO,
-  FECHAMENTO_AGOSTO, RESUMO_MENSAL, RESUMO_MEDIA, RESUMO_EXTRA,
+  FECHAMENTO_AGOSTO, TRANSFERENCIAS_ESPECIE_CONTA, RESUMO_MENSAL, RESUMO_MEDIA, RESUMO_EXTRA,
   CONTAS_A_PAGAR, BOLETOS_A_PAGAR,
 } from "./dados.js";
 
@@ -79,8 +79,8 @@ function CaixaDoDia() {
     <div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
         <StatCard label="Quanto entrou no mês" value={AGOSTO_TOTAIS.totalVendas} accent={GREEN} big />
-        <StatCard label="Dinheiro em caixa hoje" value={FECHAMENTO_AGOSTO.saldo.dinheiro} big />
-        <StatCard label="Sobrou no mês (saldo)" value={FECHAMENTO_AGOSTO.saldo.total} accent={GREEN} big />
+        <StatCard label="Quanto saiu no mês" value={FECHAMENTO_AGOSTO.despesas.total + FECHAMENTO_AGOSTO.compras.total} accent={EMBER} big />
+        <StatCard label="Sobrou no mês (saldo)" value={FECHAMENTO_AGOSTO.saldo.total} accent={FECHAMENTO_AGOSTO.saldo.total >= 0 ? GREEN : RED} big />
       </div>
 
       <SectionTitle sub="Cada linha é um dia. Toque para ver os detalhes de despesas e compras daquele dia.">
@@ -233,6 +233,20 @@ function CaixaDoDia() {
         <StatCard label="Stone" value={FECHAMENTO_AGOSTO.saldoOnline.stone} accent={FECHAMENTO_AGOSTO.saldoOnline.stone >= 0 ? GREEN : RED} />
         <StatCard label="Total disponível" value={FECHAMENTO_AGOSTO.saldoOnline.total} accent={FECHAMENTO_AGOSTO.saldoOnline.total >= 0 ? GREEN : RED} />
       </div>
+      {TRANSFERENCIAS_ESPECIE_CONTA.length > 0 && (
+        <div style={{ marginTop: 12, padding: "10px 14px", background: BG_CARD2, borderRadius: 8, fontSize: 12.5, color: BONE_DIM, lineHeight: 1.7 }}>
+          <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Transferências entre caixa físico e conta</div>
+          {TRANSFERENCIAS_ESPECIE_CONTA.map((t, i) => (
+            <div key={i}>
+              Dia {String(t.dia).padStart(2, "0")}:{" "}
+              <span style={{ color: BONE, fontFamily: "'Roboto Mono', monospace" }}>{fmt(t.valor)}</span>{" "}
+              {t.tipo === "deposito"
+                ? "saiu do caixa físico e entrou na conta (depósito)"
+                : "saiu da conta e entrou no caixa físico (saque)"}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
