@@ -9,8 +9,8 @@
 /* ---------------- DATA SNAPSHOT (da planilha "Note Brasa Nobre") ---------------- */
 /* Atualizado a partir do arquivo/link enviado. Para atualizar, envie a planilha ou o link de novo. */
 /* "Hoje" usado para calcular vencimentos: */
-const HOJE = new Date(2026, 7, 12); // 12 de agosto de 2026
-const ULTIMA_ATUALIZACAO = new Date(2026, 7, 12); // atualize esta linha toda vez que os dados forem atualizados
+const HOJE = new Date(2026, 7, 14); // 14 de agosto de 2026
+const ULTIMA_ATUALIZACAO = new Date(2026, 7, 14); // atualize esta linha toda vez que os dados forem atualizados
 
 /* "Vendido no dia" = Dinheiro + Pix + Crédito + Débito + Voucher + Crediário (bate com a linha RESUMO DIA da planilha). */
 /* recebParc = pagamentos de fiado recebidos no dia — entram no caixa, mas NÃO contam como venda nova (a venda já foi contada quando foi feita a fiado). */
@@ -118,15 +118,18 @@ const RESUMO_MENSAL = [
 const RESUMO_MEDIA = { entrada: 103781.92, saida: 14646.8, compras: 72050, saldo: 17085.12 };
 const RESUMO_EXTRA = { saldoAgo: -15828, debito: -48260, saldoOnline: 5000, aReceber: 3000 };
 
+/* ATUALIZADO em 14/08 — valores planejados de "Impostos e taxas" e "Fixas/consumo" mudaram na planilha,
+   e a coluna REALIZADO está zerada em todas as categorias (antes: Folha R$574, Fixas R$337,26).
+   Atenção: o TOTAL da planilha (R$ 8.755,77) não bate com a soma das categorias (R$ 17.364,87) — vale conferir a fórmula na origem. */
 const CONTAS_A_PAGAR = [
   { categoria: "Pró-labore (sócios)", planejado: 6000, realizado: 0, itens: ["Jaime — 2.000", "Edcarlos — 2.000", "Fabinho — 2.000"] },
-  { categoria: "Folha de pessoal", planejado: 7058, realizado: 574, itens: ["Jaime Victor — 1.621", "Carla — 1.621", "Jadson — 1.621", "Edson — 1.621", "Hora extra"] },
-  { categoria: "Sistemas", planejado: 287, realizado: 287, itens: ["Sistema Caixa — 287 (trimestral, pago em agosto: 860)"] },
+  { categoria: "Folha de pessoal", planejado: 7058, realizado: 0, itens: ["Jaime Victor — 1.621", "Carla — 1.621", "Jadson — 1.621", "Edson — 1.621", "Hora extra"] },
+  { categoria: "Sistemas", planejado: 287, realizado: 0, itens: ["Sistema Caixa — 287 (trimestral, pago em agosto: 860)"] },
   { categoria: "Serviços prestados", planejado: 1000, realizado: 0, itens: [] },
   { categoria: "Bens duráveis", planejado: 1000, realizado: 0, itens: [] },
   { categoria: "Material de expediente", planejado: 500, realizado: 0, itens: ["Limpeza — 250", "Escritório — 200", "Água — 50"] },
-  { categoria: "Impostos e taxas", planejado: 1321.18, realizado: 0, itens: ["DAE — 106,35", "DAS Simples Nacional — 714,83", "Máquina Infinity — 250", "NexfitPay — 250"] },
-  { categoria: "Fixas / consumo", planejado: 337.26, realizado: 337.26, itens: ["Água/esgoto — 337,26 (pago 09/08)", "Aluguel, Energia, Celular, Internet e Contador — ainda não orçados este mês"] },
+  { categoria: "Impostos e taxas", planejado: 301.1, realizado: 0, itens: ["DAS Simples Nacional — 301,10 (venc. 20/08)", "DAE, Máquina Infinity e NexfitPay — sem valor lançado"] },
+  { categoria: "Fixas / consumo", planejado: 918.77, realizado: 0, itens: ["Água/esgoto — 337,26 (pago 09/08)", "Internet — 81,51 (pago 09/08)", "Contador — 500,00 (pagamento mensal, a pagar)", "Aluguel, Energia e Celular — ainda não orçados este mês"] },
   { categoria: "Outros", planejado: 300, realizado: 0, itens: [] },
 ];
 
