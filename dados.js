@@ -98,7 +98,7 @@ const FECHAMENTO_AGOSTO = {
   compras: { dinheiro: 16429.95, pixStone: 29507.94, total: 45937.89 },
   saldo: { dinheiro: -1107.18, pixStone: 1210.21, total: 103.03 },
   saldoOnlineContaEm: "12/08",
-  saldoOnline: { dinheiro: 987.31, dinheiroDiff: -1637.71, stone: 1575, total: 2562.31 },
+  saldoOnline: { dinheiro: 987.31, stone: 1575, total: 2562.31 },
 };
 
 /* Transferências entre o dinheiro físico (caixa) e o saldo em conta.
@@ -119,7 +119,7 @@ const RESUMO_MEDIA = { entrada: 103781.92, saida: 14646.8, compras: 72050, saldo
 const RESUMO_EXTRA = { saldoAgo: -15828, debito: -48260, saldoOnline: 5000, aReceber: 3000 };
 
 const CONTAS_A_PAGAR = [
-  { categoria: "Pró-labore (sócios)", planejado: 6000, realizado: 574, itens: ["Jaime — 2.000", "Edcarlos — 2.000", "Fabinho — 2.000"] },
+  { categoria: "Pró-labore (sócios)", planejado: 6000, realizado: 0, itens: ["Jaime — 2.000", "Edcarlos — 2.000", "Fabinho — 2.000"] },
   { categoria: "Folha de pessoal", planejado: 7058, realizado: 574, itens: ["Jaime Victor — 1.621", "Carla — 1.621", "Jadson — 1.621", "Edson — 1.621", "Hora extra"] },
   { categoria: "Sistemas", planejado: 287, realizado: 287, itens: ["Sistema Caixa — 287 (trimestral, pago em agosto: 860)"] },
   { categoria: "Serviços prestados", planejado: 1000, realizado: 0, itens: [] },
@@ -145,6 +145,11 @@ const BOLETOS_A_PAGAR = [
   { compra: new Date(2026, 7, 15), fornecedor: "Lucas Argolo", produto: "Banda de boi (113 kg)", valor: 2410, vencimento: new Date(2026, 7, 15), pago: false },
   { compra: new Date(2026, 7, 15), fornecedor: "Lucas Argolo", produto: "Carneiro (21,1 kg)", valor: 651, vencimento: new Date(2026, 7, 15), pago: false },
   { compra: new Date(2026, 7, 15), fornecedor: "Lucas Argolo", produto: "Fretes de boi (19 fretes)", valor: 1520, vencimento: new Date(2026, 7, 15), pago: false },
+  { compra: new Date(2026, 7, 12), fornecedor: "Jonas", produto: "Porco (78,9 kg)", valor: 1104.6, vencimento: new Date(2026, 7, 12), pago: false },
+  { compra: new Date(2026, 7, 12), fornecedor: "Ticiano", produto: "Carne (40 kg carne + 4,7 kg fígado)", valor: 894, vencimento: new Date(2026, 7, 12), pago: false },
+  { compra: new Date(2026, 7, 12), fornecedor: "Maximiel", produto: "Porco (79 kg)", valor: 1106, vencimento: new Date(2026, 7, 12), pago: false },
+  { compra: new Date(2026, 7, 12), fornecedor: "Jaiminho", produto: "Sobra na casa", valor: 2000, vencimento: new Date(2026, 7, 12), pago: false },
+  { compra: new Date(2026, 7, 12), fornecedor: "Fabinho", produto: "Sobra na casa", valor: 4260, vencimento: new Date(2026, 7, 12), pago: false },
 ];
 
 export {
