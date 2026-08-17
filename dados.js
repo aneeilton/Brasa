@@ -9,8 +9,8 @@
 /* ---------------- DATA SNAPSHOT (da planilha "Note Brasa Nobre") ---------------- */
 /* Atualizado a partir do arquivo/link enviado. Para atualizar, envie a planilha ou o link de novo. */
 /* "Hoje" usado para calcular vencimentos: */
-const HOJE = new Date(2026, 7, 14); // 14 de agosto de 2026
-const ULTIMA_ATUALIZACAO = new Date(2026, 7, 14); // atualize esta linha toda vez que os dados forem atualizados
+const HOJE = new Date(2026, 7, 16); // 16 de agosto de 2026
+const ULTIMA_ATUALIZACAO = new Date(2026, 7, 16); // atualize esta linha toda vez que os dados forem atualizados
 
 /* "Vendido no dia" = Dinheiro + Pix + Crédito + Débito + Voucher + Crediário (bate com a linha RESUMO DIA da planilha). */
 /* recebParc = pagamentos de fiado recebidos no dia — entram no caixa, mas NÃO contam como venda nova (a venda já foi contada quando foi feita a fiado). */
@@ -27,12 +27,16 @@ const AGOSTO_DIAS = [
   { dia: 10, dinheiro: 1090, pix: 1376.2, credito: 192.24, debito: 75.07, voucher: 0, crediario: 37.01, recebParcDinheiro: 0, recebParcPix: 0 },
   { dia: 11, dinheiro: 1417, pix: 619, credito: 365.47, debito: 118.88, voucher: 0, crediario: 190.76, recebParcDinheiro: 0, recebParcPix: 0 },
   { dia: 12, dinheiro: 980, pix: 890.07, credito: 224.3, debito: 362.31, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
+  { dia: 13, dinheiro: 670, pix: 1136.28, credito: 332.21, debito: 234.57, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
+  { dia: 14, dinheiro: 1640, pix: 1248.63, credito: 514.33, debito: 449.42, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
+  { dia: 15, dinheiro: 0, pix: 2687.98, credito: 1721.69, debito: 1475.45, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
+  { dia: 16, dinheiro: 0, pix: 1938.02, credito: 616.95, debito: 797.53, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
 ].map((d) => ({ ...d, totalVendas: d.dinheiro + d.pix + d.credito + d.debito + d.voucher + d.crediario }));
 
 const AGOSTO_TOTAIS = {
-  dinheiro: 21262.37, pix: 15963.18, credito: 11060.92, debito: 9575.59, voucher: 831.44, crediario: 1921.16,
+  dinheiro: 23572.37, pix: 22974.09, credito: 14246.1, debito: 12532.56, voucher: 831.44, crediario: 1921.16,
   recebParcDinheiro: 0, recebParcPix: 0,
-  totalVendas: 60614.66,
+  totalVendas: 76077.72,
 };
 
 const DESPESAS_AGOSTO = [
@@ -53,6 +57,8 @@ const DESPESAS_AGOSTO = [
   { dia: 10, desc: "GTA Boi", valor: 18.72, tipo: "PIX" },
   { dia: 11, desc: "Bobina", valor: 256.3, tipo: "PIX" },
   { dia: 12, desc: "Taxa matança", valor: 525.84, tipo: "PIX" },
+  { dia: 14, desc: "Vale Jadson", valor: 75, tipo: "PIX" },
+  { dia: 16, desc: "João Pedro", valor: 300, tipo: "PIX" },
   { dia: 3, desc: "Pagamento Jaiminho (parte do pagamento)", valor: 5675, tipo: "Dinheiro" },
   { dia: 10, desc: "Almoço", valor: 25, tipo: "Dinheiro" },
   { dia: 3, desc: "Flanelas e canetas", valor: 12.3, tipo: "Dinheiro" },
@@ -81,6 +87,9 @@ const COMPRAS_AGOSTO = [
   { dia: 8, desc: "Boleto BRF", valor: 278.32, tipo: "Boleto" },
   { dia: 5, desc: "Boi (Vanderilei)", valor: 2050, tipo: "Dinheiro" },
   { dia: 7, desc: "Bebidas (Heineken + lata)", valor: 120.8, tipo: "Dinheiro" },
+  { dia: 13, desc: "Boleto BRF", valor: 590.52, tipo: "Boleto" },
+  { dia: 14, desc: "Frango Cilene (semana retrasada)", valor: 109.42, tipo: "PIX" },
+  { dia: 14, desc: "Pé de moleque", valor: 35, tipo: "Dinheiro" },
   { dia: 10, desc: "Boi (Lucas)", valor: 7060, tipo: "PIX" },
   { dia: 10, desc: "Boleto Petropolis (cerveja)", valor: 144.3, tipo: "Boleto" },
   { dia: 10, desc: "Boleto Avigro", valor: 154.78, tipo: "Boleto" },
@@ -93,12 +102,12 @@ const COMPRAS_AGOSTO = [
 ];
 
 const FECHAMENTO_AGOSTO = {
-  totalGeral: { dinheiro: 21262.37, pixStone: 15963.18, cartao: 21467.95, total: 58693.5 },
-  despesas: { dinheiro: 5939.6, pixStone: 6712.98, total: 12652.58 },
-  compras: { dinheiro: 16429.95, pixStone: 29507.94, total: 45937.89 },
-  saldo: { dinheiro: -1107.18, pixStone: 1210.21, total: 103.03 },
-  saldoOnlineContaEm: "12/08",
-  saldoOnline: { dinheiro: 987.31, stone: 1575, total: 2562.31 },
+  totalGeral: { dinheiro: 23572.37, pixStone: 22974.09, cartao: 27610.1, total: 74156.56 },
+  despesas: { dinheiro: 5939.6, pixStone: 7087.98, total: 13027.58 },
+  compras: { dinheiro: 16464.95, pixStone: 30207.88, total: 46672.83 },
+  saldo: { dinheiro: 1167.82, pixStone: 13288.33, total: 14456.15 },
+  saldoOnlineContaEm: "16/08",
+  saldoOnline: { dinheiro: 0, stone: 11180.85, total: 11180.85 },
 };
 
 /* Transferências entre o dinheiro físico (caixa) e o saldo em conta.
@@ -118,9 +127,6 @@ const RESUMO_MENSAL = [
 const RESUMO_MEDIA = { entrada: 103781.92, saida: 14646.8, compras: 72050, saldo: 17085.12 };
 const RESUMO_EXTRA = { saldoAgo: -15828, debito: -48260, saldoOnline: 5000, aReceber: 3000 };
 
-/* ATUALIZADO em 14/08 — valores planejados de "Impostos e taxas" e "Fixas/consumo" mudaram na planilha,
-   e a coluna REALIZADO está zerada em todas as categorias (antes: Folha R$574, Fixas R$337,26).
-   Atenção: o TOTAL da planilha (R$ 8.755,77) não bate com a soma das categorias (R$ 17.364,87) — vale conferir a fórmula na origem. */
 const CONTAS_A_PAGAR = [
   { categoria: "Pró-labore (sócios)", planejado: 6000, realizado: 0, itens: ["Jaime — 2.000", "Edcarlos — 2.000", "Fabinho — 2.000"] },
   { categoria: "Folha de pessoal", planejado: 7058, realizado: 0, itens: ["Jaime Victor — 1.621", "Carla — 1.621", "Jadson — 1.621", "Edson — 1.621", "Hora extra"] },
@@ -128,8 +134,8 @@ const CONTAS_A_PAGAR = [
   { categoria: "Serviços prestados", planejado: 1000, realizado: 0, itens: [] },
   { categoria: "Bens duráveis", planejado: 1000, realizado: 0, itens: [] },
   { categoria: "Material de expediente", planejado: 500, realizado: 0, itens: ["Limpeza — 250", "Escritório — 200", "Água — 50"] },
-  { categoria: "Impostos e taxas", planejado: 301.1, realizado: 0, itens: ["DAS Simples Nacional — 301,10 (venc. 20/08)", "DAE, Máquina Infinity e NexfitPay — sem valor lançado"] },
-  { categoria: "Fixas / consumo", planejado: 918.77, realizado: 0, itens: ["Água/esgoto — 337,26 (pago 09/08)", "Internet — 81,51 (pago 09/08)", "Contador — 500,00 (pagamento mensal, a pagar)", "Aluguel, Energia e Celular — ainda não orçados este mês"] },
+  { categoria: "Impostos e taxas", planejado: 301.1, realizado: 0, itens: ["DAE — imposto de compra suple", "DAS Simples Nacional — 301,10 (venc. 20/08)", "Máquina Infinity", "NexfitPay"] },
+  { categoria: "Fixas / consumo", planejado: 918.77, realizado: 0, itens: ["Aluguel", "Energia Elétrica/Solar", "Água/esgoto — 337,26 (pago 09/08)", "Plano celular", "Internet — 81,51 (pago 09/08)", "Contador — 500 (pagamento mensal, a pagar)"] },
   { categoria: "Outros", planejado: 300, realizado: 0, itens: [] },
 ];
 
