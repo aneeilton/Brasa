@@ -9,8 +9,8 @@
 /* ---------------- DATA SNAPSHOT (da planilha "Note Brasa Nobre") ---------------- */
 /* Atualizado a partir do arquivo/link enviado. Para atualizar, envie a planilha ou o link de novo. */
 /* "Hoje" usado para calcular vencimentos: */
-const HOJE = new Date(2026, 7, 16); // 16 de agosto de 2026
-const ULTIMA_ATUALIZACAO = new Date(2026, 7, 16); // atualize esta linha toda vez que os dados forem atualizados
+const HOJE = new Date(2026, 7, 18); // 18 de agosto de 2026
+const ULTIMA_ATUALIZACAO = new Date(2026, 7, 18); // atualize esta linha toda vez que os dados forem atualizados
 
 /* "Vendido no dia" = Dinheiro + Pix + Crédito + Débito + Voucher + Crediário (bate com a linha RESUMO DIA da planilha). */
 /* recebParc = pagamentos de fiado recebidos no dia — entram no caixa, mas NÃO contam como venda nova (a venda já foi contada quando foi feita a fiado). */
@@ -29,14 +29,16 @@ const AGOSTO_DIAS = [
   { dia: 12, dinheiro: 980, pix: 890.07, credito: 224.3, debito: 362.31, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
   { dia: 13, dinheiro: 670, pix: 1136.28, credito: 332.21, debito: 234.57, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
   { dia: 14, dinheiro: 1640, pix: 1248.63, credito: 514.33, debito: 449.42, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
-  { dia: 15, dinheiro: 0, pix: 2687.98, credito: 1721.69, debito: 1475.45, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
-  { dia: 16, dinheiro: 0, pix: 1938.02, credito: 616.95, debito: 797.53, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
+  { dia: 15, dinheiro: 7060, pix: 2687.98, credito: 1721.69, debito: 1475.45, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
+  { dia: 16, dinheiro: 990, pix: 1938.02, credito: 616.95, debito: 797.53, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
+  { dia: 17, dinheiro: 1040, pix: 657.49, credito: 244.92, debito: 101.35, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
+  { dia: 18, dinheiro: 1054, pix: 218.19, credito: 93.14, debito: 275.59, voucher: 0, crediario: 0, recebParcDinheiro: 0, recebParcPix: 0 },
 ].map((d) => ({ ...d, totalVendas: d.dinheiro + d.pix + d.credito + d.debito + d.voucher + d.crediario }));
 
 const AGOSTO_TOTAIS = {
-  dinheiro: 23572.37, pix: 22974.09, credito: 14246.1, debito: 12532.56, voucher: 831.44, crediario: 1921.16,
+  dinheiro: 33716.37, pix: 23849.77, credito: 14584.16, debito: 12909.5, voucher: 831.44, crediario: 1921.16,
   recebParcDinheiro: 0, recebParcPix: 0,
-  totalVendas: 76077.72,
+  totalVendas: 87812.4,
 };
 
 const DESPESAS_AGOSTO = [
@@ -59,6 +61,13 @@ const DESPESAS_AGOSTO = [
   { dia: 12, desc: "Taxa matança", valor: 525.84, tipo: "PIX" },
   { dia: 14, desc: "Vale Jadson", valor: 75, tipo: "PIX" },
   { dia: 16, desc: "João Pedro", valor: 300, tipo: "PIX" },
+  { dia: 17, desc: "Sacola", valor: 174, tipo: "PIX" },
+  { dia: 17, desc: "Sacola", valor: 75, tipo: "PIX" },
+  { dia: 17, desc: "Jandira Contabilidade", valor: 500, tipo: "PIX" },
+  { dia: 17, desc: "Quinzena Carla", valor: 889, tipo: "PIX" },
+  { dia: 17, desc: "Aneilton Finanças", valor: 1500, tipo: "PIX" },
+  { dia: 17, desc: "Troca dinheiro", valor: 450, tipo: "PIX" },
+  { dia: 17, desc: "Aluguel", valor: 5000, tipo: "Dinheiro" },
   { dia: 3, desc: "Pagamento Jaiminho (parte do pagamento)", valor: 5675, tipo: "Dinheiro" },
   { dia: 10, desc: "Almoço", valor: 25, tipo: "Dinheiro" },
   { dia: 3, desc: "Flanelas e canetas", valor: 12.3, tipo: "Dinheiro" },
@@ -90,6 +99,10 @@ const COMPRAS_AGOSTO = [
   { dia: 13, desc: "Boleto BRF", valor: 590.52, tipo: "Boleto" },
   { dia: 14, desc: "Frango Cilene (semana retrasada)", valor: 109.42, tipo: "PIX" },
   { dia: 14, desc: "Pé de moleque", valor: 35, tipo: "Dinheiro" },
+  { dia: 17, desc: "Pão de alho", valor: 130, tipo: "PIX" },
+  { dia: 17, desc: "Boleto BRF", valor: 278.39, tipo: "Boleto" },
+  { dia: 17, desc: "Boleto Avigro", valor: 154.84, tipo: "Boleto" },
+  { dia: 18, desc: "Boi de Vanderlei (57,08 @ + restante do outro boi)", valor: 15000, tipo: "PIX" },
   { dia: 10, desc: "Boi (Lucas)", valor: 7060, tipo: "PIX" },
   { dia: 10, desc: "Boleto Petropolis (cerveja)", valor: 144.3, tipo: "Boleto" },
   { dia: 10, desc: "Boleto Avigro", valor: 154.78, tipo: "Boleto" },
@@ -102,12 +115,12 @@ const COMPRAS_AGOSTO = [
 ];
 
 const FECHAMENTO_AGOSTO = {
-  totalGeral: { dinheiro: 23572.37, pixStone: 22974.09, cartao: 27610.1, total: 74156.56 },
-  despesas: { dinheiro: 5939.6, pixStone: 7087.98, total: 13027.58 },
-  compras: { dinheiro: 16464.95, pixStone: 30207.88, total: 46672.83 },
-  saldo: { dinheiro: 1167.82, pixStone: 13288.33, total: 14456.15 },
-  saldoOnlineContaEm: "16/08",
-  saldoOnline: { dinheiro: 0, stone: 11180.85, total: 11180.85 },
+  totalGeral: { dinheiro: 33716.37, pixStone: 23849.77, cartao: 28325.1, total: 85891.24 },
+  despesas: { dinheiro: 10939.6, pixStone: 10675.98, total: 21615.58 },
+  compras: { dinheiro: 16464.95, pixStone: 45771.11, total: 62236.06 },
+  saldo: { dinheiro: 6311.82, pixStone: -4272.22, total: 2039.6 },
+  saldoOnlineContaEm: "18/08",
+  saldoOnline: { dinheiro: 1197, stone: 231.45, total: 1428.45 },
 };
 
 /* Transferências entre o dinheiro físico (caixa) e o saldo em conta.
@@ -148,8 +161,8 @@ const BOLETOS_A_PAGAR = [
   { compra: new Date(2026, 7, 10), fornecedor: "Avigro", produto: "Derivados de frango", valor: 154.78, vencimento: new Date(2026, 7, 10), pago: true },
   { compra: new Date(2026, 7, 10), fornecedor: "Avigro", produto: "Derivados de frango", valor: 324.94, vencimento: new Date(2026, 7, 10), pago: true },
   { compra: new Date(2026, 7, 11), fornecedor: "BRF", produto: "Derivados de carne", valor: 574.44, vencimento: new Date(2026, 7, 11), pago: false },
-  { compra: new Date(2026, 7, 15), fornecedor: "BRF", produto: "Derivados de carne", valor: 278.39, vencimento: new Date(2026, 7, 15), pago: false },
-  { compra: new Date(2026, 7, 17), fornecedor: "Avigro", produto: "Derivados de frango", valor: 154.84, vencimento: new Date(2026, 7, 17), pago: false },
+  { compra: new Date(2026, 7, 15), fornecedor: "BRF", produto: "Derivados de carne", valor: 278.39, vencimento: new Date(2026, 7, 15), pago: true },
+  { compra: new Date(2026, 7, 17), fornecedor: "Avigro", produto: "Derivados de frango", valor: 154.84, vencimento: new Date(2026, 7, 17), pago: true },
   { compra: new Date(2026, 7, 15), fornecedor: "Lucas Argolo", produto: "Boi (48,4 @)", valor: 15004, vencimento: new Date(2026, 7, 15), pago: false },
   { compra: new Date(2026, 7, 15), fornecedor: "Lucas Argolo", produto: "Banda de boi (113 kg)", valor: 2410, vencimento: new Date(2026, 7, 15), pago: false },
   { compra: new Date(2026, 7, 15), fornecedor: "Lucas Argolo", produto: "Carneiro (21,1 kg)", valor: 651, vencimento: new Date(2026, 7, 15), pago: false },
