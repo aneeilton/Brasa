@@ -208,6 +208,46 @@ export async function sairEquipe() {
   await sb.auth.signOut();
 }
 
+/* Quem está logado pode ver o painel do negócio? (modo local: sim) */
+export async function ehGestor() {
+  if (!sb) return true;
+  const { data } = await sb.rpc("is_gestor");
+  return !!data;
+}
+
+const linhaParaAgendamento = (l) => ({
+  id: l.id,
+  barbeiroId: l.barbeiro_id,
+  data: l.inicio.slice(0, 10),
+  hora: l.inicio.slice(11, 16),
+  duracao: paraMin(l.fim.slice(11, 16)) - paraMin(l.inicio.slice(11, 16)),
+  servicos: l.servicos,
+  servicosNomes: l.servicos_nomes,
+  total: Number(l.total),
+  status: l.status,
+  cliente: l.clientes,
+});
+
+/* Todos os agendamentos entre duas datas (para o painel). Busca em páginas,
+   porque o Supabase devolve no máximo 1000 linhas por consulta. */
+export async function agendamentosEntre(de, ate) {
+  if (!sb) return ler(K_AGENDAMENTOS, []).filter((a) => a.data >= de && a.data <= ate);
+  const todas = [];
+  const PAGINA = 1000;
+  for (let i = 0; ; i += PAGINA) {
+    const { data: linhas, error } = await sb
+      .from("agendamentos")
+      .select("id, barbeiro_id, inicio, fim, servicos, servicos_nomes, total, status, clientes(nome, whatsapp)")
+      .gte("inicio", `${de}T00:00:00`)
+      .lte("inicio", `${ate}T23:59:59`)
+      .order("inicio")
+      .range(i, i + PAGINA - 1);
+    if (error) throw erro(error);
+    todas.push(...linhas.map(linhaParaAgendamento));
+    if (linhas.length < PAGINA) return todas;
+  }
+}
+
 /* Agenda completa de um dia (com dados do cliente). */
 export async function agendaDoDia(data) {
   if (!sb) return ler(K_AGENDAMENTOS, []).filter((a) => a.data === data);
@@ -218,18 +258,7 @@ export async function agendaDoDia(data) {
     .lte("inicio", `${data}T23:59:59`)
     .order("inicio");
   if (error) throw erro(error);
-  return linhas.map((l) => ({
-    id: l.id,
-    barbeiroId: l.barbeiro_id,
-    data: l.inicio.slice(0, 10),
-    hora: l.inicio.slice(11, 16),
-    duracao: paraMin(l.fim.slice(11, 16)) - paraMin(l.inicio.slice(11, 16)),
-    servicos: l.servicos,
-    servicosNomes: l.servicos_nomes,
-    total: Number(l.total),
-    status: l.status,
-    cliente: l.clientes,
-  }));
+  return linhas.map(linhaParaAgendamento);
 }
 
 export async function atualizarStatus(id, status) {
