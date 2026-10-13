@@ -80,7 +80,7 @@ alter table public.equipe add column if not exists gestor boolean not null defau
 
 -- ---------- Configuração de funcionamento ----------
 -- Fica nas funções abaixo: terça a sábado, 08–12 e 14–18, a cada 15 min,
--- até 30 dias à frente, no mínimo 30 min de antecedência, fuso da Bahia.
+-- até 30 dias à frente, no mínimo 1 hora de antecedência, fuso da Bahia.
 
 -- ============================================================
 --  RLS: tudo fechado por padrão; só o necessário é aberto.
@@ -245,7 +245,7 @@ begin
      ) then
     raise exception 'FORA_DO_HORARIO';
   end if;
-  if p_inicio < v_agora + interval '30 minutes' or p_inicio::date > v_agora::date + 30 then
+  if p_inicio < v_agora + interval '60 minutes' or p_inicio::date > v_agora::date + 30 then
     raise exception 'FORA_DO_PRAZO';
   end if;
 

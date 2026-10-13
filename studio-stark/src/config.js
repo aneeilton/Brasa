@@ -27,7 +27,8 @@ export const FUNCIONAMENTO = {
     { nome: "Tarde", inicio: "14:00", fim: "18:00" },
   ],
   intervaloMin: 15, // de quanto em quanto tempo os horários são oferecidos
-  antecedenciaMin: 30, // não permite agendar com menos de X minutos de antecedência
+  antecedenciaMin: 60, // não permite agendar com menos de X minutos de antecedência
+  fuso: "America/Bahia", // o "agora" é sempre o horário da barbearia, não o do celular
   diasAFrente: 30, // até quantos dias à frente o cliente pode agendar
 };
 
