@@ -187,12 +187,19 @@ export async function entrarEquipe({ email, senha, pin, pinCorreto }) {
     sessionStorage.setItem(K_EQUIPE_PIN, "1");
     return;
   }
-  const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password: senha });
-  if (error) throw new Error("E-mail ou senha incorretos.");
+  const { error } = await sb.auth.signInWithPassword({ email: email.trim().toLowerCase(), password: senha });
+  if (error) {
+    if (error.code === "email_not_confirmed")
+      throw new Error("Este e-mail ainda não foi confirmado no Supabase. Confirme o usuário em Authentication → Users.");
+    if (error.code === "invalid_credentials")
+      throw new Error("E-mail ou senha incorretos. Confira se o usuário existe em Authentication → Users e se a senha está certa.");
+    if (error.status === 429) throw new Error("Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.");
+    throw new Error("Não foi possível entrar agora. Verifique sua internet e tente de novo.");
+  }
   const { data: ok } = await sb.rpc("is_equipe");
   if (!ok) {
     await sb.auth.signOut();
-    throw new Error("Este usuário não tem acesso à agenda. Peça para incluí-lo na equipe.");
+    throw new Error("Login certo, mas este e-mail não está liberado na agenda (tabela equipe do Supabase).");
   }
 }
 
