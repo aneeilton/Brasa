@@ -80,6 +80,17 @@ export const CATEGORIAS = [
   },
 ];
 
+/* Fotos dos serviços em /public/servicos/<id>.jpg (4:3, 640×480).
+   Hoje são fotos ilustrativas de banco de imagens gratuito (Pexels) — troque pelos
+   cortes feitos na barbearia mantendo o mesmo nome de arquivo. */
+export const FOTOS_SERVICOS = new Set([
+  "degrade", "tesoura", "navalhado", "pigmentacao", "crianca",
+  "corte-sobrancelha", "corte-bigode", "corte-barba", "navalhado-sobrancelha", "corte-barba-sobrancelha",
+  "barba", "bigode", "pezinho", "sobrancelha",
+  "lavagem", "hidratacao", "botox", "nevou",
+]);
+export const fotoServico = (id) => (FOTOS_SERVICOS.has(id) ? `/servicos/${id}.jpg` : null);
+
 export const barbeiroPorId = (id) => BARBEIROS.find((b) => b.id === id);
 
 /* PIN da área da equipe — usado só no modo local (sem Supabase).
