@@ -351,6 +351,12 @@ insert into public.servicos (id, categoria, nome, descricao, preco, duracao, ord
   ('nevou',                   'Tratamentos',        'Nevou', 'Pintura do cabelo na cor branca', 100, 45, 43)
 on conflict (id) do nothing;
 
--- Para liberar a agenda a alguém da equipe:
+-- Equipe com acesso à agenda (o login é criado em Authentication → Users).
+insert into public.equipe (email) values
+  ('jhonys@studiostark.com'),
+  ('diego@studiostark.com')
+on conflict (email) do nothing;
+
+-- Para liberar a agenda a mais alguém da equipe:
 --   1) Authentication → Users → Add user (e-mail + senha, marque "Auto Confirm").
 --   2) Rode:  insert into public.equipe (email) values ('email@exemplo.com');

@@ -8,7 +8,7 @@ export const BARBEARIA = {
   nome: "Studio Stark",
   subtitulo: "Barber & Shop",
   // Preencha quando tiver os dados — aparecem na tela inicial e na confirmação.
-  endereco: "Avenida Otávio Mangabeira",
+  endereco: "Av. Otávio Mangabeira, s/n — Olindina, BA",
   whatsapp: "5575998532839", // DDI 55 + DDD + número
   instagram: "", // ex.: "studiostark"
 };

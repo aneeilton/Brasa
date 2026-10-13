@@ -62,7 +62,7 @@ export default function Home({ cliente, proximo, onEscolher, navegar }) {
             </div>
           </div>
           {BARBEARIA.endereco && (
-            <a className="row" style={{ textDecoration: "none" }} href={`https://maps.apple.com/?q=${encodeURIComponent(BARBEARIA.endereco)}`} target="_blank" rel="noreferrer">
+            <a className="row" style={{ textDecoration: "none" }} href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(BARBEARIA.endereco.replace(" — ", ", "))}`} target="_blank" rel="noreferrer">
               <span className="notice-icon"><Pin /></span>
               <div className="row-main"><div className="row-title">{BARBEARIA.endereco}</div></div>
               <ChevronRight />
