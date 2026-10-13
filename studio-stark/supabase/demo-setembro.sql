@@ -77,12 +77,7 @@ begin
               from unnest(servs) with ordinality x(id, o) join public.servicos s on s.id = x.id;
             exit when t + dur > per[2];
             -- Clientes fiéis aparecem mais (distribuição puxada para os primeiros da lista).
-            i := 1 + floor(power(random(), 1.7) * array_length(ids, 1))::int;
-            -- Os últimos 12 da lista só vêm no início do mês: viram "clientes sumidos" no painel.
-            if i > 33 and dia > date '2026-09-11' then
-              i := 1 + floor(random() * 33)::int;
-            end if;
-            cli := ids[i];
+            cli := ids[1 + floor(power(random(), 1.7) * array_length(ids, 1))::int];
             r := random();
             st := case when r < 0.88 then 'concluido' when r < 0.94 then 'faltou' else 'cancelado' end;
             begin
