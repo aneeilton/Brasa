@@ -1,4 +1,5 @@
-import { barbeiroPorId, servicoPorId } from "../config.js";
+import { barbeiroPorId } from "../config.js";
+import { servicoPorId } from "../lib/catalogo.js";
 import { capitalizar, dataLonga, deMin, duracao, moeda, paraMin } from "../lib/format.js";
 
 /* Recibo do agendamento — usado na confirmação e na tela de sucesso. */

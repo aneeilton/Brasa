@@ -168,6 +168,7 @@ button.row:active { background: var(--fill); }
 .row-main { flex: 1; min-width: 0; }
 .row-title { font-size: 17px; }
 .row-sub { font-size: 15px; color: var(--label-2); }
+.row-desc { font-size: 13px; color: var(--label-2); display: block; margin-top: 1px; }
 .row-end { text-align: right; flex: none; }
 .row-price { font-weight: 600; font-variant-numeric: tabular-nums; }
 
@@ -185,18 +186,26 @@ button.row:active { background: var(--fill); }
 /* ---------- Barber cards ---------- */
 .barbers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
 .barber {
-  display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;
-  padding: 0; border: 0; background: var(--surface); text-align: left;
-  border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0;
+  padding: 24px 12px 16px; border: 0; background: var(--surface); text-align: center;
+  border-radius: var(--r-lg); box-shadow: var(--shadow);
   transition: transform 0.2s var(--ease);
 }
 .barber:active { transform: scale(0.98); }
 @media (hover: hover) { .barber:hover { transform: translateY(-2px); } }
-.barber-photo { aspect-ratio: 4 / 5; width: 100%; height: auto; object-fit: cover; background: var(--surface-2); }
-.barber-body { padding: 12px 14px 14px; }
-.barber-name { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.barber-photo {
+  width: min(128px, 100%); aspect-ratio: 1; height: auto; border-radius: 50%; object-fit: cover;
+  background: var(--surface-2);
+  box-shadow: 0 0 0 1px var(--separator), 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+@media (min-width: 600px) { .barber-photo { width: 160px; } }
+.barber-name { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-top: 14px; }
 .barber-tag { font-size: 13px; color: var(--label-2); margin-top: 2px; }
-.barber-cta { margin-top: 10px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.barber-cta {
+  margin-top: 14px; min-height: 36px; padding: 0 16px; border-radius: 999px;
+  background: var(--ink); color: var(--on-ink);
+  font-size: 15px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;
+}
 
 /* Barbeiro escolhido, resumido no topo das etapas */
 .chosen { display: flex; align-items: center; gap: 12px; margin: 4px 0 4px; }
@@ -342,3 +351,11 @@ dialog p { font-size: 15px; color: var(--label-2); margin: 0 0 20px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ---------- Loading ---------- */
+.skeleton {
+  background: var(--fill) !important;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+@keyframes pulse { 50% { opacity: 0.5; } }
+.loading { display: grid; place-items: center; min-height: 60vh; color: var(--label-2); }

@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { servicoPorId } from "./config.js";
 import * as store from "./lib/store.js";
 import { ehFuturo } from "./lib/agenda.js";
-import { paraMin } from "./lib/format.js";
 import Home from "./screens/Home.jsx";
 import Servicos from "./screens/Servicos.jsx";
 import Horario from "./screens/Horario.jsx";
@@ -17,28 +15,32 @@ const lerRota = () => window.location.hash.replace(/^#/, "") || "/";
 const RASCUNHO_VAZIO = { barbeiroId: null, servicos: [], data: null, hora: null };
 
 export default function App() {
+  const [pronto, setPronto] = useState(!store.remoto);
   const [rota, setRota] = useState(lerRota);
   const [cliente, setCliente] = useState(store.obterCliente);
-  const [agendamentos, setAgendamentos] = useState([]);
+  const [meus, setMeus] = useState(null); // null = carregando
   const [rascunho, setRascunho] = useState(RASCUNHO_VAZIO);
   const [ultimo, setUltimo] = useState(null);
 
-  const recarregar = useCallback(async () => setAgendamentos(await store.listarAgendamentos()), []);
+  const recarregarMeus = useCallback(async () => {
+    try {
+      setMeus(await store.meusAgendamentos());
+    } catch {
+      setMeus((m) => m ?? []);
+    }
+  }, []);
 
   useEffect(() => {
-    recarregar();
+    // Preços e serviços vêm do servidor; se ele falhar, segue com a lista local.
+    store.carregarCatalogo().finally(() => setPronto(true));
+    recarregarMeus();
     const onHash = () => {
       setRota(lerRota());
       window.scrollTo(0, 0);
     };
     window.addEventListener("hashchange", onHash);
-    // Outra aba (ex.: agenda da equipe aberta junto) gravou algo: atualiza.
-    window.addEventListener("storage", recarregar);
-    return () => {
-      window.removeEventListener("hashchange", onHash);
-      window.removeEventListener("storage", recarregar);
-    };
-  }, [recarregar]);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [recarregarMeus]);
 
   const navegar = (r, { substituir = false } = {}) => {
     if (substituir) {
@@ -66,43 +68,25 @@ export default function App() {
     }));
 
   async function confirmar(dadosCliente) {
-    const itens = rascunho.servicos.map(servicoPorId);
-    const duracao = itens.reduce((s, x) => s + x.duracao, 0);
-    const ini = paraMin(rascunho.hora);
-    const ag = await store.criarAgendamento(
-      {
-        barbeiroId: rascunho.barbeiroId,
-        data: rascunho.data,
-        hora: rascunho.hora,
-        servicos: rascunho.servicos,
-        servicosNomes: itens.map((s) => s.nome),
-        duracao,
-        total: itens.reduce((s, x) => s + x.preco, 0),
-        cliente: dadosCliente,
-      },
-      (todos) =>
-        todos.some(
-          (a) =>
-            a.status !== "cancelado" &&
-            a.barbeiroId === rascunho.barbeiroId &&
-            a.data === rascunho.data &&
-            ini < paraMin(a.hora) + a.duracao &&
-            paraMin(a.hora) < ini + duracao
-        )
-    );
-    await store.salvarCliente(dadosCliente);
-    setCliente(dadosCliente);
+    const ag = await store.criarAgendamento({
+      barbeiroId: rascunho.barbeiroId,
+      data: rascunho.data,
+      hora: rascunho.hora,
+      servicos: rascunho.servicos,
+      cliente: dadosCliente,
+    });
+    setCliente(store.obterCliente());
     setUltimo(ag);
-    await recarregar();
     setRascunho(RASCUNHO_VAZIO);
     navegar("/agendar/pronto", { substituir: true });
+    recarregarMeus();
   }
 
-  const proximo =
-    cliente &&
-    agendamentos
-      .filter((a) => a.cliente.whatsapp === cliente.whatsapp && a.status === "confirmado" && ehFuturo(a))
-      .sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora))[0];
+  const proximo = (meus ?? [])
+    .filter((a) => a.status === "confirmado" && ehFuturo(a))
+    .sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora))[0];
+
+  if (!pronto) return <div className="loading" aria-busy="true">Carregando…</div>;
 
   switch (rota) {
     case "/agendar/servicos":
@@ -113,7 +97,6 @@ export default function App() {
       return rascunho.barbeiroId ? (
         <Horario
           rascunho={rascunho}
-          agendamentos={agendamentos}
           onChange={atualizar}
           onContinuar={() => navegar("/agendar/confirmar")}
           onVoltar={() => window.history.back()}
@@ -124,14 +107,7 @@ export default function App() {
         <Confirmar
           rascunho={rascunho}
           cliente={cliente}
-          onConfirmar={async (c) => {
-            try {
-              await confirmar(c);
-            } catch (e) {
-              if (e.code === "OCUPADO") await recarregar();
-              throw e;
-            }
-          }}
+          onConfirmar={confirmar}
           onVoltar={() => window.history.back()}
           onTrocarHorario={() => { atualizar({ hora: null }); window.history.back(); }}
         />
@@ -142,21 +118,15 @@ export default function App() {
       return (
         <MeusHorarios
           cliente={cliente}
-          agendamentos={agendamentos}
+          meus={meus}
           navegar={navegar}
-          onCancelar={async (id) => { await store.atualizarStatus(id, "cancelado"); await recarregar(); }}
+          onCancelar={async (id) => { await store.cancelarMeu(id); await recarregarMeus(); }}
           onSalvarCliente={async (c) => setCliente(await store.salvarCliente(c))}
-          onSair={async () => { await store.esquecerCliente(); setCliente(null); }}
+          onSair={async () => { await store.esquecerCliente(); setCliente(null); setMeus([]); }}
         />
       );
     case "/equipe":
-      return (
-        <Equipe
-          agendamentos={agendamentos}
-          navegar={navegar}
-          onStatus={async (id, status) => { await store.atualizarStatus(id, status); await recarregar(); }}
-        />
-      );
+      return <Equipe navegar={navegar} />;
     default:
       return (
         <Home

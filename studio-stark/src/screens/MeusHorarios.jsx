@@ -33,22 +33,28 @@ function Cartao({ ag, onCancelar }) {
   );
 }
 
-export default function MeusHorarios({ cliente, agendamentos, onCancelar, onSalvarCliente, onSair, navegar }) {
+export default function MeusHorarios({ cliente, meus, onCancelar, onSalvarCliente, onSair, navegar }) {
   const [cancelando, setCancelando] = useState(null);
   const [editando, setEditando] = useState(false);
   const [saindo, setSaindo] = useState(false);
+  const [falha, setFalha] = useState(null);
   const form = useClientForm(cliente);
 
-  const meus = cliente ? agendamentos.filter((a) => a.cliente.whatsapp === cliente.whatsapp) : [];
+  const lista = meus ?? [];
   const ordem = (a, b) => (a.data + a.hora).localeCompare(b.data + b.hora);
-  const proximos = meus.filter((a) => a.status === "confirmado" && ehFuturo(a)).sort(ordem);
-  const historico = meus.filter((a) => !proximos.includes(a)).sort(ordem).reverse();
+  const proximos = lista.filter((a) => a.status === "confirmado" && ehFuturo(a)).sort(ordem);
+  const historico = lista.filter((a) => !proximos.includes(a)).sort(ordem).reverse();
 
   async function salvar() {
     form.setEnviado(true);
     if (!form.valido) return;
-    await onSalvarCliente(normalizarCliente(form.valores));
-    setEditando(false);
+    setFalha(null);
+    try {
+      await onSalvarCliente(normalizarCliente(form.valores));
+      setEditando(false);
+    } catch (e) {
+      setFalha(e.message);
+    }
   }
 
   return (
@@ -65,7 +71,9 @@ export default function MeusHorarios({ cliente, agendamentos, onCancelar, onSalv
         ) : (
           <>
             <h2 className="section-header">Próximos</h2>
-            {proximos.length ? (
+            {meus === null ? (
+              <div className="group skeleton" style={{ height: 120 }} aria-busy="true" aria-label="Carregando" />
+            ) : proximos.length ? (
               proximos.map((a) => <Cartao key={a.id} ag={a} onCancelar={setCancelando} />)
             ) : (
               <div className="group">
@@ -75,6 +83,8 @@ export default function MeusHorarios({ cliente, agendamentos, onCancelar, onSalv
                 </div>
               </div>
             )}
+
+            {falha && !editando && <div className="alert" role="alert">{falha}</div>}
 
             {historico.length > 0 && (
               <>
@@ -87,6 +97,7 @@ export default function MeusHorarios({ cliente, agendamentos, onCancelar, onSalv
             {editando ? (
               <>
                 <ClientForm form={form} idPrefix="perfil" />
+                {falha && <div className="alert" role="alert">{falha}</div>}
                 <div className="stack" style={{ marginTop: 12 }}>
                   <button className="btn btn-primary btn-block" onClick={salvar}>Salvar</button>
                   <button className="btn btn-secondary btn-block" onClick={() => setEditando(false)}>Cancelar</button>
@@ -112,7 +123,14 @@ export default function MeusHorarios({ cliente, agendamentos, onCancelar, onSalv
         message={cancelando ? `${capitalizar(dataLonga(cancelando.data))}, às ${cancelando.hora}. O horário fica livre para outra pessoa.` : ""}
         confirmLabel="Cancelar horário"
         onCancel={() => setCancelando(null)}
-        onConfirm={async () => { await onCancelar(cancelando.id); setCancelando(null); }}
+        onConfirm={async () => {
+          try {
+            await onCancelar(cancelando.id);
+          } catch (e) {
+            setFalha(e.message);
+          }
+          setCancelando(null);
+        }}
       />
       <Confirm
         open={saindo}

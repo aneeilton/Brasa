@@ -1,11 +1,11 @@
-import { CATEGORIAS, servicoPorId } from "../config.js";
+import { obterCategorias, servicoPorId } from "../lib/catalogo.js";
 import { Check } from "../components/Icons.jsx";
 import { ActionBar, Progress, ScreenTitle, TopBar } from "../components/UI.jsx";
 import { duracao, moeda } from "../lib/format.js";
 import Chosen from "./Chosen.jsx";
 
 export default function Servicos({ rascunho, onToggle, onContinuar, onVoltar }) {
-  const selecionados = rascunho.servicos.map(servicoPorId);
+  const selecionados = rascunho.servicos.map(servicoPorId).filter(Boolean);
   const total = selecionados.reduce((s, x) => s + x.preco, 0);
   const tempo = selecionados.reduce((s, x) => s + x.duracao, 0);
 
@@ -17,7 +17,7 @@ export default function Servicos({ rascunho, onToggle, onContinuar, onVoltar }) 
         <Chosen barbeiroId={rascunho.barbeiroId} onTrocar={onVoltar} />
         <ScreenTitle sub="Pode escolher mais de um — somamos o tempo e o valor.">O que vamos fazer?</ScreenTitle>
 
-        {CATEGORIAS.map((cat) => (
+        {obterCategorias().map((cat) => (
           <section key={cat.id} aria-labelledby={`cat-${cat.id}`}>
             <h2 className="section-header" id={`cat-${cat.id}`}>{cat.nome}</h2>
             <div className="group">
@@ -28,11 +28,11 @@ export default function Servicos({ rascunho, onToggle, onContinuar, onVoltar }) 
                     <span className="check"><Check /></span>
                     <span className="row-main">
                       <span className="row-title" style={{ display: "block" }}>{s.nome}</span>
+                      {s.descricao && <span className="row-desc">{s.descricao}</span>}
                       <span className="row-sub">{duracao(s.duracao)}</span>
                     </span>
                     <span className="row-end row-price">
                       {moeda(s.preco)}
-                      {s.assinatura && <span className="row-sub" style={{ display: "block", fontWeight: 400 }}>/mês</span>}
                     </span>
                   </button>
                 );

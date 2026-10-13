@@ -8,16 +8,15 @@ export const BARBEARIA = {
   nome: "Studio Stark",
   subtitulo: "Barber & Shop",
   // Preencha quando tiver os dados — aparecem na tela inicial e na confirmação.
-  endereco: "",
-  whatsapp: "", // ex.: "5511999999999" (com DDI 55 + DDD)
+  endereco: "Avenida Otávio Mangabeira",
+  whatsapp: "5575998532839", // DDI 55 + DDD + número
   instagram: "", // ex.: "studiostark"
 };
 
-/* Fotos: troque os arquivos em /public/barbeiros por fotos reais
-   (ex.: jhonys.jpg) e atualize o caminho abaixo. Formato ideal: retrato 4:5. */
+/* Fotos em /public/barbeiros — quadradas (exibidas em círculo), rosto centralizado. */
 export const BARBEIROS = [
-  { id: "jhonys", nome: "Jhonys", foto: "/barbeiros/jhonys.svg", destaque: "Degradê e navalhado" },
-  { id: "diego", nome: "Diego", foto: "/barbeiros/diego.svg", destaque: "Corte na tesoura e barba" },
+  { id: "jhonys", nome: "Jhonys", foto: "/barbeiros/jhonys.jpg" },
+  { id: "diego", nome: "Diego", foto: "/barbeiros/diego.jpg" },
 ];
 
 /* Funcionamento: terça a sábado, 08:00–12:00 e 14:00–18:00. */
@@ -32,7 +31,9 @@ export const FUNCIONAMENTO = {
   diasAFrente: 30, // até quantos dias à frente o cliente pode agendar
 };
 
-/* Serviços — preço em reais, duração em minutos. */
+/* Serviços — preço em reais, duração em minutos.
+   Com o Supabase ligado, a lista vem da tabela `servicos` (editável no painel);
+   esta aqui é usada só no modo local/offline. */
 export const CATEGORIAS = [
   {
     id: "cortes",
@@ -73,25 +74,13 @@ export const CATEGORIAS = [
       { id: "lavagem", nome: "Lavagem de cabelo", preco: 10, duracao: 10 },
       { id: "hidratacao", nome: "Hidratação", preco: 20, duracao: 10 },
       { id: "botox", nome: "Botox", preco: 60, duracao: 40 },
-      { id: "nevou", nome: "Nevou", preco: 100, duracao: 45 },
-    ],
-  },
-  {
-    id: "assinaturas",
-    nome: "Assinaturas mensais",
-    nota: "Valor mensal. Agende cada visita por aqui normalmente.",
-    servicos: [
-      { id: "ass-corte", nome: "Assinatura mensal · Corte", preco: 89.9, duracao: 30, assinatura: true },
-      { id: "ass-barba", nome: "Assinatura mensal · Barba", preco: 69.9, duracao: 20, assinatura: true },
-      { id: "ass-corte-barba", nome: "Assinatura mensal · Corte + Barba", preco: 149.9, duracao: 45, assinatura: true },
+      { id: "nevou", nome: "Nevou", descricao: "Pintura do cabelo na cor branca", preco: 100, duracao: 45 },
     ],
   },
 ];
 
-export const SERVICOS = CATEGORIAS.flatMap((c) => c.servicos);
-export const servicoPorId = (id) => SERVICOS.find((s) => s.id === id);
 export const barbeiroPorId = (id) => BARBEIROS.find((b) => b.id === id);
 
-/* PIN da área da equipe (#/agenda). Isto é só uma trava visual — veja o README:
-   segurança de verdade exige login no servidor. */
+/* PIN da área da equipe — usado só no modo local (sem Supabase).
+   Com o Supabase ligado, a equipe entra com e-mail e senha. */
 export const PIN_EQUIPE = "1234";

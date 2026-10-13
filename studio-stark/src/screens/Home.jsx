@@ -1,8 +1,9 @@
 import logo from "../assets/logo.svg";
 import { BARBEARIA, BARBEIROS, FUNCIONAMENTO, barbeiroPorId } from "../config.js";
-import { ChevronRight, Clock, Pin, Calendar } from "../components/Icons.jsx";
+import { ChevronRight, Clock, Pin, Calendar, Chat } from "../components/Icons.jsx";
+import { linkBarbearia } from "../lib/whatsapp.js";
 import { TopBar } from "../components/UI.jsx";
-import { capitalizar, dataLonga, primeiroNome } from "../lib/format.js";
+import { capitalizar, dataLonga, mascaraTelefone, primeiroNome } from "../lib/format.js";
 
 const DIAS = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
 const faixaDias = () => {
@@ -40,18 +41,16 @@ export default function Home({ cliente, proximo, onEscolher, navegar }) {
 
         <div className="barbers">
           {BARBEIROS.map((b) => (
-            <button key={b.id} className="barber" onClick={() => onEscolher(b.id)} aria-label={`Agendar com ${b.nome}. ${b.destaque}`}>
-              <img className="barber-photo" src={b.foto} alt="" loading="eager" width="400" height="500" />
-              <div className="barber-body">
-                <div className="barber-name">{b.nome}</div>
-                <div className="barber-tag">{b.destaque}</div>
-                <div className="barber-cta">Agendar <ChevronRight size={14} /></div>
-              </div>
+            <button key={b.id} className="barber" onClick={() => onEscolher(b.id)} aria-label={`Agendar com ${b.nome}`}>
+              <img className="barber-photo" src={b.foto} alt="" loading="eager" width="160" height="160" />
+              <span className="barber-name">{b.nome}</span>
+              <span className="barber-tag">Barbeiro</span>
+              <span className="barber-cta" aria-hidden="true">Agendar <ChevronRight size={14} /></span>
             </button>
           ))}
         </div>
 
-        <h2 className="section-header">Funcionamento</h2>
+        <h2 className="section-header">Funcionamento e contato</h2>
         <div className="group">
           <div className="row">
             <span className="notice-icon"><Clock /></span>
@@ -66,6 +65,16 @@ export default function Home({ cliente, proximo, onEscolher, navegar }) {
             <a className="row" style={{ textDecoration: "none" }} href={`https://maps.apple.com/?q=${encodeURIComponent(BARBEARIA.endereco)}`} target="_blank" rel="noreferrer">
               <span className="notice-icon"><Pin /></span>
               <div className="row-main"><div className="row-title">{BARBEARIA.endereco}</div></div>
+              <ChevronRight />
+            </a>
+          )}
+          {linkBarbearia() && (
+            <a className="row" style={{ textDecoration: "none" }} href={linkBarbearia("Olá! Vim pelo app de agendamento.")} target="_blank" rel="noreferrer">
+              <span className="notice-icon"><Chat size={20} /></span>
+              <div className="row-main">
+                <div className="row-title">WhatsApp</div>
+                <div className="row-sub tabular">{mascaraTelefone(BARBEARIA.whatsapp.slice(2))}</div>
+              </div>
               <ChevronRight />
             </a>
           )}

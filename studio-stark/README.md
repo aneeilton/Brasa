@@ -14,8 +14,10 @@ Na Vercel/Netlify, aponte o *Root Directory* para `studio-stark/`.
 
 | O quê | Arquivo |
 | --- | --- |
-| Serviços, preços, durações, barbeiros, horários, endereço, PIN | `src/config.js` |
-| Fotos dos barbeiros (hoje ilustrativas) | `public/barbeiros/` — troque o arquivo e o caminho em `config.js` (retrato 4:5) |
+| Barbeiros, horários, endereço, WhatsApp | `src/config.js` |
+| Serviços e preços | tabela `servicos` no Supabase (ou `src/config.js` no modo demonstração) |
+| Banco de dados | `supabase/schema.sql` |
+| Fotos dos barbeiros | `public/barbeiros/` (quadradas, exibidas em círculo) |
 | Logomarca | `src/assets/logo.svg` (extraída do PDF oficial) |
 | Cores, tipografia, espaçamentos | `src/styles.css` (tokens no topo; modo escuro automático) |
 | Gravação de dados | `src/lib/store.js` |
@@ -26,11 +28,29 @@ Na Vercel/Netlify, aponte o *Root Directory* para `studio-stark/`.
 - **Agendar** (3 etapas) — serviços (pode somar mais de um) → dia e horário → confirmar.
   O cadastro (nome e sobrenome, WhatsApp, e-mail) é pedido **só no primeiro agendamento**.
 - **Meus horários** — próximos e histórico, cancelar, adicionar ao calendário, editar dados.
-- **Agenda da equipe** (`#/equipe`) — agenda por dia e barbeiro, botão de lembrete por WhatsApp, concluir/cancelar.
+- **Agenda da equipe** (`#/equipe`) — login, agenda por dia e barbeiro, lembrete por WhatsApp, concluir / faltou / cancelar.
 
-## Limitação importante (protótipo)
+## Ligar ao Supabase (agenda compartilhada)
 
-Os dados ficam **no próprio aparelho** (localStorage). Para uso real, o agendamento feito
-pelo celular do cliente precisa aparecer no celular do barbeiro — isso exige um backend
-(sugestão: Supabase). Toda a leitura/gravação está isolada em `src/lib/store.js`, então a
-troca não mexe nas telas. O PIN da equipe também é só uma trava visual até existir login real.
+Sem configuração o app roda em **modo demonstração** (dados só no aparelho, PIN `1234`).
+Para valer de verdade:
+
+1. **Banco:** no projeto Supabase → *SQL Editor* → *New query* → cole todo o
+   `supabase/schema.sql` → *Run*. Cria tabelas, regras de segurança, funções e o catálogo.
+2. **Chaves:** *Project Settings → API* → copie a *Project URL* e a chave
+   *anon / publishable*. Coloque em `.env.local` (veja `.env.example`) e nas
+   variáveis de ambiente da Vercel (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`).
+3. **Equipe:** *Authentication → Users → Add user* (e-mail + senha, “Auto Confirm”) e
+   depois, no SQL Editor: `insert into public.equipe (email) values ('email@dele.com');`
+4. **Recomendado:** *Authentication → Sign In / Providers* → desative “Allow new users to sign up”.
+
+**Preços e serviços** passam a ser editados no próprio Supabase (*Table Editor → servicos*):
+mudar preço, duração, descrição ou desativar (`ativo = false`) aparece no app na hora.
+
+### Como a segurança funciona
+- Cliente não faz login: no 1º agendamento recebe um código secreto guardado só no aparelho
+  dele; “Meus horários” e “Cancelar” só funcionam com esse código.
+- O público só vê **quais horários estão ocupados**, nunca nomes ou telefones.
+- Preço e duração são calculados no servidor; o banco recusa dois clientes no mesmo horário,
+  dias/horários fora do funcionamento e mais de 3 horários futuros por WhatsApp.
+- A agenda (com nomes e telefones) só abre para e-mails cadastrados na tabela `equipe`.
