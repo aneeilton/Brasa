@@ -75,10 +75,12 @@ end $$;
 create table if not exists public.equipe (
   email text primary key check (email = lower(email))
 );
+-- Gestor vê o painel do negócio (faturamento, ocupação, clientes).
+alter table public.equipe add column if not exists gestor boolean not null default false;
 
 -- ---------- Configuração de funcionamento ----------
 -- Fica nas funções abaixo: terça a sábado, 08–12 e 14–18, a cada 15 min,
--- até 30 dias à frente, no mínimo 30 min de antecedência, fuso da Bahia.
+-- até 30 dias à frente, no mínimo 1 hora de antecedência, fuso da Bahia.
 
 -- ============================================================
 --  RLS: tudo fechado por padrão; só o necessário é aberto.
@@ -96,6 +98,16 @@ as $$
   select exists (
     select 1 from public.equipe e
     where e.email = lower(coalesce(auth.jwt() ->> 'email', ''))
+  );
+$$;
+
+create or replace function public.is_gestor()
+returns boolean
+language sql stable security definer set search_path = ''
+as $$
+  select exists (
+    select 1 from public.equipe e
+    where e.email = lower(coalesce(auth.jwt() ->> 'email', '')) and e.gestor
   );
 $$;
 
@@ -233,7 +245,7 @@ begin
      ) then
     raise exception 'FORA_DO_HORARIO';
   end if;
-  if p_inicio < v_agora + interval '30 minutes' or p_inicio::date > v_agora::date + 30 then
+  if p_inicio < v_agora + interval '60 minutes' or p_inicio::date > v_agora::date + 30 then
     raise exception 'FORA_DO_PRAZO';
   end if;
 
@@ -316,6 +328,8 @@ revoke all on function public.cancelar_meu_agendamento(uuid, uuid) from public;
 revoke all on function public.atualizar_cliente(uuid, text, text, text) from public;
 
 grant execute on function public.is_equipe() to anon, authenticated;
+revoke all on function public.is_gestor() from public;
+grant execute on function public.is_gestor() to authenticated;
 grant execute on function public.horarios_ocupados(date, date) to anon, authenticated;
 grant execute on function public.criar_agendamento(uuid, text, text, text, text, timestamp, text[]) to anon, authenticated;
 grant execute on function public.meus_agendamentos(uuid) to anon, authenticated;
@@ -356,6 +370,9 @@ insert into public.equipe (email) values
   ('jhonys@studiostark.com'),
   ('diego@studiostark.com')
 on conflict (email) do nothing;
+
+-- Para dar acesso ao painel do negócio (faturamento, clientes):
+--   update public.equipe set gestor = true where email = 'email@exemplo.com';
 
 -- Para liberar a agenda a mais alguém da equipe:
 --   1) Authentication → Users → Add user (e-mail + senha, marque "Auto Confirm").

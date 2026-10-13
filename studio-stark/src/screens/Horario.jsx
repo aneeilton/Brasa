@@ -98,9 +98,7 @@ export default function Horario({ rascunho, onChange, onContinuar, onVoltar }) {
                             className="slot"
                             role="radio"
                             aria-checked={rascunho.hora === h.hora}
-                            disabled={!h.livre}
-                            aria-label={h.livre ? h.hora : `${h.hora}, ocupado`}
-                            onClick={() => onChange({ hora: h.hora })}
+                                onClick={() => onChange({ hora: h.hora })}
                           >
                             {h.hora}
                           </button>

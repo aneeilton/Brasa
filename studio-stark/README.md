@@ -29,6 +29,10 @@ Na Vercel/Netlify, aponte o *Root Directory* para `studio-stark/`.
   O cadastro (nome e sobrenome, WhatsApp, e-mail) é pedido **só no primeiro agendamento**.
 - **Meus horários** — próximos e histórico, cancelar, adicionar ao calendário, editar dados.
 - **Agenda da equipe** (`#/equipe`) — login, agenda por dia e barbeiro, lembrete por WhatsApp, concluir / faltou / cancelar.
+- **Painel do negócio** (só para gestores) — faturamento realizado e previsto com comparação ao
+  período anterior, ticket médio, ocupação, faltas, movimento por dia, desempenho por barbeiro,
+  serviços mais pedidos, horários de pico e clientes sumidos com botão para chamar no WhatsApp.
+  Para liberar: `update public.equipe set gestor = true where email = '...';`
 
 ## Ligar ao Supabase (agenda compartilhada)
 

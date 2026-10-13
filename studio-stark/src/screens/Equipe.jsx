@@ -3,10 +3,11 @@ import { BARBEIROS, PIN_EQUIPE, barbeiroPorId } from "../config.js";
 import { Chat } from "../components/Icons.jsx";
 import { Confirm, ScreenTitle, TopBar } from "../components/UI.jsx";
 import DateStrip from "../components/DateStrip.jsx";
-import { diasDisponiveis } from "../lib/agenda.js";
+import { abreNoDia, agoraNaBarbearia, diasDisponiveis } from "../lib/agenda.js";
 import * as store from "../lib/store.js";
 import { capitalizar, dataLonga, deMin, isoData, mascaraTelefone, moeda, paraMin } from "../lib/format.js";
 import { linkLembrete } from "../lib/whatsapp.js";
+import Painel from "./Painel.jsx";
 
 function Login({ onOk }) {
   const [email, setEmail] = useState("");
@@ -65,18 +66,33 @@ export default function Equipe({ navegar }) {
   const [liberado, setLiberado] = useState(null); // null = verificando
   const dias = useMemo(() => {
     const abertos = diasDisponiveis();
-    const hoje = isoData(new Date());
-    return abertos.includes(hoje) ? abertos : [hoje, ...abertos];
+    const agora = agoraNaBarbearia();
+    const hoje = isoData(agora);
+    return abertos.includes(hoje) || !abreNoDia(agora) ? abertos : [hoje, ...abertos];
   }, []);
-  const [dia, setDia] = useState(() => diasDisponiveis()[0]);
+  // A equipe vê o dia de hoje mesmo depois do último horário vendável.
+  const [dia, setDia] = useState(() => dias[0]);
   const [filtro, setFiltro] = useState("todos");
   const [lista, setLista] = useState(null);
   const [falha, setFalha] = useState(null);
   const [cancelando, setCancelando] = useState(null);
+  const [gestor, setGestor] = useState(false);
+  const [aba, setAba] = useState(() => sessionStorage.getItem("stark.aba") || "agenda");
 
   useEffect(() => {
     store.sessaoEquipe().then(setLiberado);
   }, []);
+
+  useEffect(() => {
+    if (liberado) store.ehGestor().then(setGestor);
+    else setGestor(false);
+  }, [liberado]);
+
+  const trocarAba = (a) => {
+    setAba(a);
+    sessionStorage.setItem("stark.aba", a);
+  };
+  const vendoPainel = gestor && aba === "painel";
 
   const carregar = useCallback(async () => {
     setFalha(null);
@@ -89,7 +105,7 @@ export default function Equipe({ navegar }) {
 
   // Atualiza ao trocar de dia, a cada minuto e quando o app volta ao primeiro plano.
   useEffect(() => {
-    if (!liberado) return;
+    if (!liberado || vendoPainel) return;
     setLista(null);
     carregar();
     const t = setInterval(carregar, 60_000);
@@ -99,7 +115,7 @@ export default function Equipe({ navegar }) {
       clearInterval(t);
       document.removeEventListener("visibilitychange", aoVoltar);
     };
-  }, [liberado, carregar]);
+  }, [liberado, vendoPainel, carregar]);
 
   const mudarStatus = async (id, status) => {
     try {
@@ -121,15 +137,24 @@ export default function Equipe({ navegar }) {
       <TopBar
         onBack={() => navegar("/")}
         backLabel="Início"
-        title="Agenda"
+        title="Equipe"
         end={liberado && (
           <button className="link-btn" onClick={async () => { await store.sairEquipe(); setLiberado(false); }}>Sair</button>
         )}
       />
       <main className="page screen">
-        <ScreenTitle>Agenda da equipe</ScreenTitle>
+        <ScreenTitle>{vendoPainel ? "Painel do negócio" : "Agenda da equipe"}</ScreenTitle>
+        {liberado && gestor && (
+          <div className="segmented abas" role="tablist" aria-label="Área da equipe">
+            {[["agenda", "Agenda"], ["painel", "Painel"]].map(([k, r]) => (
+              <button key={k} role="tab" aria-selected={aba === k} aria-pressed={aba === k} onClick={() => trocarAba(k)}>{r}</button>
+            ))}
+          </div>
+        )}
         {liberado === null ? null : !liberado ? (
           <Login onOk={() => setLiberado(true)} />
+        ) : vendoPainel ? (
+          <Painel irParaAgenda={() => trocarAba("agenda")} />
         ) : (
           <>
             <div className="segmented" role="group" aria-label="Filtrar por barbeiro">

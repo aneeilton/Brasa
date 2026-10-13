@@ -187,18 +187,65 @@ export async function entrarEquipe({ email, senha, pin, pinCorreto }) {
     sessionStorage.setItem(K_EQUIPE_PIN, "1");
     return;
   }
-  const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password: senha });
-  if (error) throw new Error("E-mail ou senha incorretos.");
+  const { error } = await sb.auth.signInWithPassword({ email: email.trim().toLowerCase(), password: senha });
+  if (error) {
+    if (error.code === "email_not_confirmed")
+      throw new Error("Este e-mail ainda não foi confirmado no Supabase. Confirme o usuário em Authentication → Users.");
+    if (error.code === "invalid_credentials")
+      throw new Error("E-mail ou senha incorretos. Confira se o usuário existe em Authentication → Users e se a senha está certa.");
+    if (error.status === 429) throw new Error("Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.");
+    throw new Error("Não foi possível entrar agora. Verifique sua internet e tente de novo.");
+  }
   const { data: ok } = await sb.rpc("is_equipe");
   if (!ok) {
     await sb.auth.signOut();
-    throw new Error("Este usuário não tem acesso à agenda. Peça para incluí-lo na equipe.");
+    throw new Error("Login certo, mas este e-mail não está liberado na agenda (tabela equipe do Supabase).");
   }
 }
 
 export async function sairEquipe() {
   if (!sb) return sessionStorage.removeItem(K_EQUIPE_PIN);
   await sb.auth.signOut();
+}
+
+/* Quem está logado pode ver o painel do negócio? (modo local: sim) */
+export async function ehGestor() {
+  if (!sb) return true;
+  const { data } = await sb.rpc("is_gestor");
+  return !!data;
+}
+
+const linhaParaAgendamento = (l) => ({
+  id: l.id,
+  barbeiroId: l.barbeiro_id,
+  data: l.inicio.slice(0, 10),
+  hora: l.inicio.slice(11, 16),
+  duracao: paraMin(l.fim.slice(11, 16)) - paraMin(l.inicio.slice(11, 16)),
+  servicos: l.servicos,
+  servicosNomes: l.servicos_nomes,
+  total: Number(l.total),
+  status: l.status,
+  cliente: l.clientes,
+});
+
+/* Todos os agendamentos entre duas datas (para o painel). Busca em páginas,
+   porque o Supabase devolve no máximo 1000 linhas por consulta. */
+export async function agendamentosEntre(de, ate) {
+  if (!sb) return ler(K_AGENDAMENTOS, []).filter((a) => a.data >= de && a.data <= ate);
+  const todas = [];
+  const PAGINA = 1000;
+  for (let i = 0; ; i += PAGINA) {
+    const { data: linhas, error } = await sb
+      .from("agendamentos")
+      .select("id, barbeiro_id, inicio, fim, servicos, servicos_nomes, total, status, clientes(nome, whatsapp)")
+      .gte("inicio", `${de}T00:00:00`)
+      .lte("inicio", `${ate}T23:59:59`)
+      .order("inicio")
+      .range(i, i + PAGINA - 1);
+    if (error) throw erro(error);
+    todas.push(...linhas.map(linhaParaAgendamento));
+    if (linhas.length < PAGINA) return todas;
+  }
 }
 
 /* Agenda completa de um dia (com dados do cliente). */
@@ -211,18 +258,7 @@ export async function agendaDoDia(data) {
     .lte("inicio", `${data}T23:59:59`)
     .order("inicio");
   if (error) throw erro(error);
-  return linhas.map((l) => ({
-    id: l.id,
-    barbeiroId: l.barbeiro_id,
-    data: l.inicio.slice(0, 10),
-    hora: l.inicio.slice(11, 16),
-    duracao: paraMin(l.fim.slice(11, 16)) - paraMin(l.inicio.slice(11, 16)),
-    servicos: l.servicos,
-    servicosNomes: l.servicos_nomes,
-    total: Number(l.total),
-    status: l.status,
-    cliente: l.clientes,
-  }));
+  return linhas.map(linhaParaAgendamento);
 }
 
 export async function atualizarStatus(id, status) {
