@@ -17,8 +17,14 @@ export function agoraNaBarbearia(d = new Date()) {
 
 /* Primeiro minuto em que ainda se pode começar um atendimento hoje. */
 const limiteHoje = (agora) => agora.getHours() * 60 + agora.getMinutes() + FUNCIONAMENTO.antecedenciaMin;
-const ultimoInicio = () =>
-  paraMin(FUNCIONAMENTO.periodos[FUNCIONAMENTO.periodos.length - 1].fim) - FUNCIONAMENTO.intervaloMin;
+/* Um horário cabe no período? Com `ultimoInicio`, vale o horário de INÍCIO
+   (pode terminar depois); sem ele, o atendimento precisa terminar até o `fim`. */
+const cabe = (p, t, duracaoMin) =>
+  p.ultimoInicio ? t <= paraMin(p.ultimoInicio) : t + duracaoMin <= paraMin(p.fim);
+const ultimoInicio = () => {
+  const p = FUNCIONAMENTO.periodos[FUNCIONAMENTO.periodos.length - 1];
+  return p.ultimoInicio ? paraMin(p.ultimoInicio) : paraMin(p.fim) - FUNCIONAMENTO.intervaloMin;
+};
 
 /* Próximos dias em que a barbearia abre. Hoje só entra se ainda houver horário possível. */
 export function diasDisponiveis(hoje = agoraNaBarbearia()) {
@@ -48,9 +54,8 @@ export function horariosDoDia({ data, barbeiroId, duracaoMin, agendamentos, agor
 
   return FUNCIONAMENTO.periodos.map((p) => {
     const ini = paraMin(p.inicio);
-    const fim = paraMin(p.fim);
     const horarios = [];
-    for (let t = ini; t + duracaoMin <= fim; t += FUNCIONAMENTO.intervaloMin) {
+    for (let t = ini; cabe(p, t, duracaoMin); t += FUNCIONAMENTO.intervaloMin) {
       const passou = ehHoje && t < limite;
       const conflito = ocupados.some(([oi, of]) => sobrepoe(t, t + duracaoMin, oi, of));
       if (passou || conflito) continue;

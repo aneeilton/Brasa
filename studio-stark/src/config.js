@@ -29,12 +29,14 @@ export const BARBEIROS = [
   { id: "diego", nome: "Diego", foto: "/barbeiros/diego.jpg" },
 ];
 
-/* Funcionamento: terça a sábado, 08:00–12:00 e 14:00–18:00. */
+/* Funcionamento: terça a sábado.
+   Manhã: o atendimento precisa TERMINAR até 12:00 (almoço).
+   Tarde: pode COMEÇAR até 19:00 (`ultimoInicio`), mesmo que termine depois. */
 export const FUNCIONAMENTO = {
   diasDaSemana: [2, 3, 4, 5, 6], // 0 = domingo … 6 = sábado
   periodos: [
     { nome: "Manhã", inicio: "08:00", fim: "12:00" },
-    { nome: "Tarde", inicio: "14:00", fim: "18:00" },
+    { nome: "Tarde", inicio: "14:00", fim: "19:00", ultimoInicio: "19:00" },
   ],
   intervaloMin: 15, // de quanto em quanto tempo os horários são oferecidos
   antecedenciaMin: 60, // não permite agendar com menos de X minutos de antecedência

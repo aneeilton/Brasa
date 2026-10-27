@@ -79,7 +79,8 @@ create table if not exists public.equipe (
 alter table public.equipe add column if not exists gestor boolean not null default false;
 
 -- ---------- Configuração de funcionamento ----------
--- Fica nas funções abaixo: terça a sábado, 08–12 e 14–18, a cada 15 min,
+-- Fica nas funções abaixo: terça a sábado; manhã 08–12 (termina até 12h),
+-- tarde a partir das 14h com início até 19h; a cada 15 min,
 -- até 30 dias à frente, no mínimo 1 hora de antecedência, fuso da Bahia.
 
 -- ============================================================
@@ -241,7 +242,7 @@ begin
      or extract(second from p_inicio) <> 0
      or not (
        (p_inicio::time >= '08:00' and v_fim <= p_inicio::date + time '12:00')
-       or (p_inicio::time >= '14:00' and v_fim <= p_inicio::date + time '18:00')
+       or (p_inicio::time >= '14:00' and p_inicio::time <= '19:00')  -- tarde: pode COMEÇAR até 19:00
      ) then
     raise exception 'FORA_DO_HORARIO';
   end if;
