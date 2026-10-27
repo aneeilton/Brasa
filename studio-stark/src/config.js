@@ -4,6 +4,16 @@
    barbeiros, fotos) fica aqui. Não é preciso mexer no resto.
    ============================================================ */
 
+/* Supabase (banco de dados). A chave "publishable" é pública por natureza: a
+   segurança está nas regras do banco (supabase/schema.sql). Fica aqui para o app
+   funcionar mesmo se o .env.production não for enviado (o upload pelo site do
+   GitHub ignora arquivos que começam com ponto). Variáveis de ambiente da Vercel,
+   se existirem, têm prioridade. */
+export const SUPABASE = {
+  url: "https://cphecmrxjutoniostdor.supabase.co",
+  chave: "sb_publishable_ohzjgBgSc62dsSsRY0PdyQ_xCRiWowJ",
+};
+
 export const BARBEARIA = {
   nome: "Studio Stark",
   subtitulo: "Barber & Shop",

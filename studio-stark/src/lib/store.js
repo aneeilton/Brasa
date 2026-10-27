@@ -6,11 +6,14 @@
    As telas usam apenas as funções exportadas aqui.
    ============================================================ */
 import { createClient } from "@supabase/supabase-js";
+import { SUPABASE } from "../config.js";
 import { definirCategorias, servicoPorId } from "./catalogo.js";
 import { paraMin } from "./format.js";
 
-const URL_SB = import.meta.env.VITE_SUPABASE_URL;
-const CHAVE_SB = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Modo demonstração (sem banco) só em desenvolvimento local com VITE_DEMO=1 ou --mode demo.
+const DEMO = import.meta.env.MODE === "demo" || import.meta.env.VITE_DEMO === "1";
+const URL_SB = DEMO ? null : import.meta.env.VITE_SUPABASE_URL || SUPABASE.url;
+const CHAVE_SB = DEMO ? null : import.meta.env.VITE_SUPABASE_ANON_KEY || SUPABASE.chave;
 const sb = URL_SB && CHAVE_SB ? createClient(URL_SB, CHAVE_SB) : null;
 
 export const remoto = !!sb;
