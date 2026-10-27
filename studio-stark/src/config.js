@@ -106,6 +106,10 @@ export const fotoServico = (id) => (FOTOS_SERVICOS.has(id) ? `/servicos/${id}.jp
 /* Cartão fidelidade: atendimentos concluídos até o bônus. */
 export const FIDELIDADE_META = 12;
 
+/* Categorias em que o cliente escolhe UM só serviço (um corte por agendamento).
+   Os nomes precisam bater com a coluna `categoria` da tabela `servicos`. */
+export const CATEGORIAS_UM_CORTE = ["Cortes", "Combos"];
+
 export const barbeiroPorId = (id) => BARBEIROS.find((b) => b.id === id);
 
 /* PIN da área da equipe — usado só no modo local (sem Supabase).

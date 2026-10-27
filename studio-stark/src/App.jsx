@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import * as store from "./lib/store.js";
+import { alternarServico } from "./lib/catalogo.js";
 import { ehFuturo } from "./lib/agenda.js";
 import Home from "./screens/Home.jsx";
 import Servicos from "./screens/Servicos.jsx";
@@ -67,7 +68,7 @@ export default function App() {
   const toggleServico = (id) =>
     setRascunho((r) => ({
       ...r,
-      servicos: r.servicos.includes(id) ? r.servicos.filter((s) => s !== id) : [...r.servicos, id],
+      servicos: alternarServico(r.servicos, id).servicos, // um corte por vez; extras somam
       hora: null, // a duração mudou; o horário escolhido pode não caber mais
     }));
 

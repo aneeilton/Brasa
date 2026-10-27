@@ -234,6 +234,12 @@ begin
     raise exception 'SERVICO_INVALIDO';
   end if;
 
+  -- Um corte por agendamento (Cortes e Combos são excludentes; extras podem somar).
+  if (select count(*) from public.servicos s
+      where s.id = any (p_servicos) and s.categoria in ('Cortes', 'Combos')) > 1 then
+    raise exception 'MAIS_DE_UM_CORTE';
+  end if;
+
   v_fim := p_inicio + make_interval(mins => v_dur);
 
   -- Regras de funcionamento.

@@ -44,6 +44,7 @@ const MENSAGENS = {
   FORA_DO_HORARIO: "Esse horário está fora do funcionamento da barbearia.",
   FORA_DO_PRAZO: "Esse horário não está mais disponível. Escolha outro, por favor.",
   LIMITE_AGENDAMENTOS: "Você já tem 3 horários marcados. Para marcar outro, cancele um em “Meus horários”.",
+  MAIS_DE_UM_CORTE: "Escolha só um corte por agendamento. Volte e ajuste os serviços.",
   SERVICO_INVALIDO: "Algum serviço escolhido não está mais disponível. Volte e escolha de novo.",
   BARBEIRO_INVALIDO: "Esse barbeiro não está disponível no momento.",
   NOME_INVALIDO: "Digite nome e sobrenome.",
