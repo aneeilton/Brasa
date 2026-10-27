@@ -91,6 +91,9 @@ export const FOTOS_SERVICOS = new Set([
 ]);
 export const fotoServico = (id) => (FOTOS_SERVICOS.has(id) ? `/servicos/${id}.jpg` : null);
 
+/* Cartão fidelidade: atendimentos concluídos até o bônus. */
+export const FIDELIDADE_META = 12;
+
 export const barbeiroPorId = (id) => BARBEIROS.find((b) => b.id === id);
 
 /* PIN da área da equipe — usado só no modo local (sem Supabase).

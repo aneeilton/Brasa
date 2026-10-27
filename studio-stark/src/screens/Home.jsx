@@ -1,5 +1,5 @@
 import logo from "../assets/logo.svg";
-import { BARBEARIA, BARBEIROS, FUNCIONAMENTO, barbeiroPorId } from "../config.js";
+import { BARBEARIA, BARBEIROS, FIDELIDADE_META, FUNCIONAMENTO, barbeiroPorId } from "../config.js";
 import { ChevronRight, Clock, Pin, Calendar, Chat } from "../components/Icons.jsx";
 import { linkBarbearia } from "../lib/whatsapp.js";
 import { TopBar } from "../components/UI.jsx";
@@ -11,7 +11,7 @@ const faixaDias = () => {
   return `${capitalizar(DIAS[d[0]])} a ${DIAS[d[d.length - 1]]}`;
 };
 
-export default function Home({ cliente, proximo, onEscolher, navegar }) {
+export default function Home({ cliente, proximo, fidelidade, onEscolher, navegar }) {
   return (
     <>
       <TopBar
@@ -26,6 +26,16 @@ export default function Home({ cliente, proximo, onEscolher, navegar }) {
           <h1 className="large-title">{cliente ? `Olá, ${primeiroNome(cliente.nome)}.` : "Agende seu horário"}</h1>
           <p className="subhead">Escolha com quem você quer cortar.</p>
         </div>
+
+        {cliente && fidelidade != null && (
+          <button className="fid-atalho" onClick={() => navegar("/meus")} aria-label={`Cartão fidelidade: ${Math.min(fidelidade, FIDELIDADE_META)} de ${FIDELIDADE_META} atendimentos`}>
+            <span className="fid-mini" aria-hidden="true">
+              {Array.from({ length: FIDELIDADE_META }, (_, i) => <i key={i} data-on={i < fidelidade} />)}
+            </span>
+            <span className="fid-atalho-txt">Cartão fidelidade <strong className="tabular">{Math.min(fidelidade, FIDELIDADE_META)}/{FIDELIDADE_META}</strong></span>
+            <ChevronRight />
+          </button>
+        )}
 
         {proximo && (
           <button className="notice" style={{ width: "100%", border: 0, textAlign: "left" }} onClick={() => navegar("/meus")}>

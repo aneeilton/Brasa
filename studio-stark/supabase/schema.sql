@@ -316,6 +316,37 @@ begin
    where token = p_token;
 end $$;
 
+-- ---------- Cartão fidelidade ----------
+-- Conta atendimentos CONCLUÍDOS do cliente, somando todos os cadastros com o
+-- mesmo WhatsApp (o cliente pode ter agendado por mais de um aparelho).
+create or replace function public.minha_fidelidade(p_token uuid)
+returns int
+language sql stable security definer set search_path = ''
+as $$
+  select count(a.id)::int
+  from public.clientes eu
+  join public.clientes c on c.whatsapp = eu.whatsapp
+  join public.agendamentos a on a.cliente_id = c.id and a.status = 'concluido'
+  where eu.token = p_token;
+$$;
+
+-- Para a agenda da equipe: atendimentos concluídos por WhatsApp.
+create or replace function public.fidelidade_clientes(p_whatsapps text[])
+returns table (whatsapp text, concluidos int)
+language plpgsql stable security definer set search_path = ''
+as $$
+begin
+  if not public.is_equipe() then
+    raise exception 'SEM_PERMISSAO';
+  end if;
+  return query
+    select c.whatsapp, count(a.id)::int
+    from public.clientes c
+    join public.agendamentos a on a.cliente_id = c.id and a.status = 'concluido'
+    where c.whatsapp = any (p_whatsapps)
+    group by c.whatsapp;
+end $$;
+
 -- Permissões: só as funções públicas ficam acessíveis ao app.
 revoke all on function public.is_equipe() from public;
 revoke all on function public.agora_local() from public;
@@ -330,6 +361,10 @@ revoke all on function public.atualizar_cliente(uuid, text, text, text) from pub
 grant execute on function public.is_equipe() to anon, authenticated;
 revoke all on function public.is_gestor() from public;
 grant execute on function public.is_gestor() to authenticated;
+revoke all on function public.minha_fidelidade(uuid) from public;
+grant execute on function public.minha_fidelidade(uuid) to anon, authenticated;
+revoke all on function public.fidelidade_clientes(text[]) from public;
+grant execute on function public.fidelidade_clientes(text[]) to authenticated;
 grant execute on function public.horarios_ocupados(date, date) to anon, authenticated;
 grant execute on function public.criar_agendamento(uuid, text, text, text, text, timestamp, text[]) to anon, authenticated;
 grant execute on function public.meus_agendamentos(uuid) to anon, authenticated;

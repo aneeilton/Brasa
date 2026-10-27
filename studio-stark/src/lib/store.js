@@ -167,6 +167,29 @@ export async function meusAgendamentos() {
   return ler(K_AGENDAMENTOS, []).filter((a) => a.cliente.whatsapp === c.whatsapp);
 }
 
+/* Cartão fidelidade: quantos atendimentos CONCLUÍDOS este cliente tem
+   (somando todos os aparelhos em que ele agendou com o mesmo WhatsApp). */
+export async function minhaFidelidade() {
+  const c = obterCliente();
+  if (!c) return 0;
+  if (sb) return c.token ? Number(await rpc("minha_fidelidade", { p_token: c.token })) || 0 : 0;
+  return ler(K_AGENDAMENTOS, []).filter((a) => a.cliente.whatsapp === c.whatsapp && a.status === "concluido").length;
+}
+
+/* Para a equipe: { whatsapp: concluídos } dos clientes informados. */
+export async function fidelidadeClientes(whatsapps) {
+  const lista = [...new Set(whatsapps.filter(Boolean))];
+  if (!lista.length) return {};
+  if (sb) {
+    const linhas = await rpc("fidelidade_clientes", { p_whatsapps: lista });
+    return Object.fromEntries((linhas ?? []).map((l) => [l.whatsapp, l.concluidos]));
+  }
+  const mapa = {};
+  for (const a of ler(K_AGENDAMENTOS, []))
+    if (a.status === "concluido" && lista.includes(a.cliente.whatsapp)) mapa[a.cliente.whatsapp] = (mapa[a.cliente.whatsapp] ?? 0) + 1;
+  return mapa;
+}
+
 export async function cancelarMeu(id) {
   if (sb) return rpc("cancelar_meu_agendamento", { p_token: obterCliente()?.token, p_id: id });
   return atualizarLocal(id, "cancelado");

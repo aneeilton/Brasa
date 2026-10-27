@@ -19,12 +19,16 @@ export default function App() {
   const [rota, setRota] = useState(lerRota);
   const [cliente, setCliente] = useState(store.obterCliente);
   const [meus, setMeus] = useState(null); // null = carregando
+  const [fidelidade, setFidelidade] = useState(null);
   const [rascunho, setRascunho] = useState(RASCUNHO_VAZIO);
   const [ultimo, setUltimo] = useState(null);
 
   const recarregarMeus = useCallback(async () => {
     try {
-      setMeus(await store.meusAgendamentos());
+      // O cartão fidelidade nunca derruba a lista de horários (ex.: banco ainda sem a função nova).
+      const [lista, selos] = await Promise.all([store.meusAgendamentos(), store.minhaFidelidade().catch(() => null)]);
+      setMeus(lista);
+      setFidelidade(selos);
     } catch {
       setMeus((m) => m ?? []);
     }
@@ -119,10 +123,11 @@ export default function App() {
         <MeusHorarios
           cliente={cliente}
           meus={meus}
+          fidelidade={fidelidade}
           navegar={navegar}
           onCancelar={async (id) => { await store.cancelarMeu(id); await recarregarMeus(); }}
           onSalvarCliente={async (c) => setCliente(await store.salvarCliente(c))}
-          onSair={async () => { await store.esquecerCliente(); setCliente(null); setMeus([]); }}
+          onSair={async () => { await store.esquecerCliente(); setCliente(null); setMeus([]); setFidelidade(null); }}
         />
       );
     case "/equipe":
@@ -132,6 +137,7 @@ export default function App() {
         <Home
           cliente={cliente}
           proximo={proximo}
+          fidelidade={fidelidade}
           navegar={navegar}
           onEscolher={(barbeiroId) => {
             // Trocar de barbeiro mantém os serviços já escolhidos, mas não o horário.

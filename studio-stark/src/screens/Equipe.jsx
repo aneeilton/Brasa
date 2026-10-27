@@ -8,6 +8,7 @@ import * as store from "../lib/store.js";
 import { capitalizar, dataLonga, deMin, isoData, mascaraTelefone, moeda, paraMin } from "../lib/format.js";
 import { linkLembrete } from "../lib/whatsapp.js";
 import Painel from "./Painel.jsx";
+import { SeloFidelidade } from "../components/Fidelidade.jsx";
 
 function Login({ onOk }) {
   const [email, setEmail] = useState("");
@@ -76,6 +77,7 @@ export default function Equipe({ navegar }) {
   const [lista, setLista] = useState(null);
   const [falha, setFalha] = useState(null);
   const [cancelando, setCancelando] = useState(null);
+  const [selos, setSelos] = useState({});
   const [gestor, setGestor] = useState(false);
   const [aba, setAba] = useState(() => sessionStorage.getItem("stark.aba") || "agenda");
 
@@ -97,7 +99,10 @@ export default function Equipe({ navegar }) {
   const carregar = useCallback(async () => {
     setFalha(null);
     try {
-      setLista(await store.agendaDoDia(dia));
+      const doDia = await store.agendaDoDia(dia);
+      setLista(doDia);
+      // Selos do cartão fidelidade de cada cliente do dia (não trava a agenda se falhar).
+      store.fidelidadeClientes(doDia.map((a) => a.cliente?.whatsapp)).then(setSelos).catch(() => {});
     } catch (e) {
       setFalha(e.message);
     }
@@ -191,6 +196,7 @@ export default function Equipe({ navegar }) {
                     <div className="row-main">
                       <div className="row-title" style={{ fontWeight: 600 }}>
                         {a.cliente.nome}{" "}
+                        <SeloFidelidade concluidos={selos[a.cliente.whatsapp] ?? 0} />{" "}
                         {a.status === "concluido" && <span className="badge badge-ok">Concluído</span>}
                         {a.status === "cancelado" && <span className="badge badge-no">Cancelado</span>}
                         {a.status === "faltou" && <span className="badge badge-no">Faltou</span>}
