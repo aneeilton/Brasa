@@ -5,6 +5,8 @@ import ClientForm, { normalizarCliente, useClientForm } from "../components/Clie
 import { baixarConvite } from "../lib/calendario.js";
 import { capitalizar, dataLonga, mascaraTelefone, moeda } from "../lib/format.js";
 import { ehFuturo } from "../lib/agenda.js";
+import { CartaoFidelidade } from "../components/Fidelidade.jsx";
+import { CartaoAssinatura } from "../components/Assinatura.jsx";
 
 function Cartao({ ag, onCancelar }) {
   const futuro = ag.status === "confirmado" && ehFuturo(ag);
@@ -22,6 +24,7 @@ function Cartao({ ag, onCancelar }) {
         </div>
         {ag.status === "cancelado" && <span className="badge badge-no">Cancelado</span>}
         {ag.status === "concluido" && <span className="badge badge-ok">Concluído</span>}
+        {ag.status === "faltou" && <span className="badge badge-no">Faltou</span>}
       </div>
       {futuro && (
         <div className="row" style={{ gap: 8 }}>
@@ -33,7 +36,7 @@ function Cartao({ ag, onCancelar }) {
   );
 }
 
-export default function MeusHorarios({ cliente, meus, onCancelar, onSalvarCliente, onSair, navegar }) {
+export default function MeusHorarios({ cliente, meus, fidelidade, assinatura, onCancelar, onSalvarCliente, onSair, navegar }) {
   const [cancelando, setCancelando] = useState(null);
   const [editando, setEditando] = useState(false);
   const [saindo, setSaindo] = useState(false);
@@ -70,6 +73,9 @@ export default function MeusHorarios({ cliente, meus, onCancelar, onSalvarClient
           </div>
         ) : (
           <>
+            {assinatura && <CartaoAssinatura a={assinatura} />}
+            {fidelidade != null && <CartaoFidelidade concluidos={fidelidade} />}
+
             <h2 className="section-header">Próximos</h2>
             {meus === null ? (
               <div className="group skeleton" style={{ height: 120 }} aria-busy="true" aria-label="Carregando" />

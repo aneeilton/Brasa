@@ -4,6 +4,16 @@
    barbeiros, fotos) fica aqui. Não é preciso mexer no resto.
    ============================================================ */
 
+/* Supabase (banco de dados). A chave "publishable" é pública por natureza: a
+   segurança está nas regras do banco (supabase/schema.sql). Fica aqui para o app
+   funcionar mesmo se o .env.production não for enviado (o upload pelo site do
+   GitHub ignora arquivos que começam com ponto). Variáveis de ambiente da Vercel,
+   se existirem, têm prioridade. */
+export const SUPABASE = {
+  url: "https://cphecmrxjutoniostdor.supabase.co",
+  chave: "sb_publishable_ohzjgBgSc62dsSsRY0PdyQ_xCRiWowJ",
+};
+
 export const BARBEARIA = {
   nome: "Studio Stark",
   subtitulo: "Barber & Shop",
@@ -19,12 +29,14 @@ export const BARBEIROS = [
   { id: "diego", nome: "Diego", foto: "/barbeiros/diego.jpg" },
 ];
 
-/* Funcionamento: terça a sábado, 08:00–12:00 e 14:00–18:00. */
+/* Funcionamento: terça a sábado.
+   Manhã: o atendimento precisa TERMINAR até 12:00 (almoço).
+   Tarde: pode COMEÇAR até 19:00 (`ultimoInicio`), mesmo que termine depois. */
 export const FUNCIONAMENTO = {
   diasDaSemana: [2, 3, 4, 5, 6], // 0 = domingo … 6 = sábado
   periodos: [
     { nome: "Manhã", inicio: "08:00", fim: "12:00" },
-    { nome: "Tarde", inicio: "14:00", fim: "18:00" },
+    { nome: "Tarde", inicio: "14:00", fim: "19:00", ultimoInicio: "19:00" },
   ],
   intervaloMin: 15, // de quanto em quanto tempo os horários são oferecidos
   antecedenciaMin: 60, // não permite agendar com menos de X minutos de antecedência
@@ -90,6 +102,23 @@ export const FOTOS_SERVICOS = new Set([
   "lavagem", "hidratacao", "botox", "nevou",
 ]);
 export const fotoServico = (id) => (FOTOS_SERVICOS.has(id) ? `/servicos/${id}.jpg` : null);
+
+/* Cartão fidelidade: atendimentos concluídos até o bônus. */
+export const FIDELIDADE_META = 12;
+
+/* Categorias em que o cliente escolhe UM só serviço (um corte por agendamento).
+   Os nomes precisam bater com a coluna `categoria` da tabela `servicos`. */
+export const CATEGORIAS_UM_CORTE = ["Cortes", "Combos"];
+
+/* Planos de assinatura (modo demonstração; com o Supabase ligado vêm da tabela `planos`).
+   limite = atendimentos por ciclo mensal; servicos = o que conta como uso. */
+const CORTES_ASSINATURA = ["degrade", "tesoura", "navalhado", "corte-sobrancelha", "corte-bigode", "navalhado-sobrancelha"];
+export const PLANOS = [
+  { id: "ass-corte", nome: "Assinatura Corte", preco: 89.9, limite: 4, servicos: CORTES_ASSINATURA },
+  { id: "ass-barba", nome: "Assinatura Barba", preco: 69.9, limite: 4, servicos: ["barba"] },
+  { id: "ass-corte-barba", nome: "Assinatura Corte + Barba", preco: 149.9, limite: 4,
+    servicos: [...CORTES_ASSINATURA, "corte-barba", "corte-barba-sobrancelha", "barba"] },
+];
 
 export const barbeiroPorId = (id) => BARBEIROS.find((b) => b.id === id);
 

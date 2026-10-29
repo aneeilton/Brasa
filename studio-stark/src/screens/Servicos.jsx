@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { fotoServico } from "../config.js";
-import { obterCategorias, servicoPorId } from "../lib/catalogo.js";
+import { alternarServico, categoriaEhDeCorte, obterCategorias, servicoPorId } from "../lib/catalogo.js";
 import { Check, Clock } from "../components/Icons.jsx";
 import { ActionBar, Progress, ScreenTitle, TopBar } from "../components/UI.jsx";
 import { duracao, moeda } from "../lib/format.js";
@@ -68,6 +68,20 @@ export default function Servicos({ rascunho, onToggle, onContinuar, onVoltar }) 
     barraRef.current?.querySelector(`[data-cat="${ativa}"]`)?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
   }, [ativa]);
 
+  // Escolher outro corte troca o anterior; um aviso rápido deixa isso claro.
+  const [aviso, setAviso] = useState(null);
+  const timerAviso = useRef(null);
+  const escolher = (id) => {
+    const { trocado } = alternarServico(rascunho.servicos, id);
+    onToggle(id);
+    if (trocado) {
+      setAviso(`Trocamos ${trocado.nome} por ${servicoPorId(id)?.nome}. É um corte por agendamento.`);
+      clearTimeout(timerAviso.current);
+      timerAviso.current = setTimeout(() => setAviso(null), 3500);
+    }
+  };
+  useEffect(() => () => clearTimeout(timerAviso.current), []);
+
   const irPara = (id) => {
     setAtiva(id);
     indo.current = true;
@@ -82,7 +96,7 @@ export default function Servicos({ rascunho, onToggle, onContinuar, onVoltar }) 
       <main className="page screen">
         <Progress step={1} total={3} />
         <Chosen barbeiroId={rascunho.barbeiroId} onTrocar={onVoltar} />
-        <ScreenTitle sub="Pode escolher mais de um: somamos o tempo e o valor.">O que vamos fazer?</ScreenTitle>
+        <ScreenTitle sub="Escolha um corte ou combo. Barba, acabamentos e tratamentos podem ser somados.">O que vamos fazer?</ScreenTitle>
 
         <nav className="cat-bar" aria-label="Categorias de serviço" ref={barraRef}>
           {categorias.map((c) => {
@@ -98,10 +112,13 @@ export default function Servicos({ rascunho, onToggle, onContinuar, onVoltar }) 
 
         {categorias.map((cat) => (
           <section key={cat.id} id={`cat-${cat.id}`} className="cat-sec" aria-labelledby={`cat-t-${cat.id}`}>
-            <h2 className="cat-titulo" id={`cat-t-${cat.id}`}>{cat.nome}</h2>
+            <h2 className="cat-titulo" id={`cat-t-${cat.id}`}>
+              {cat.nome}
+              <span className="cat-regra">{categoriaEhDeCorte(cat) ? "Escolha 1 corte" : "Pode somar"}</span>
+            </h2>
             <div className="svc-grid">
               {cat.servicos.map((s) => (
-                <CartaoServico key={s.id} s={s} on={rascunho.servicos.includes(s.id)} onToggle={onToggle} />
+                <CartaoServico key={s.id} s={s} on={rascunho.servicos.includes(s.id)} onToggle={escolher} />
               ))}
             </div>
             {cat.nota && <p className="footnote section-footer">{cat.nota}</p>}
@@ -109,6 +126,7 @@ export default function Servicos({ rascunho, onToggle, onContinuar, onVoltar }) 
         ))}
         <p className="footnote" style={{ textAlign: "center", marginTop: 24 }}>Fotos ilustrativas.</p>
       </main>
+      <div className="toast" role="status" aria-live="polite" data-on={!!aviso}>{aviso}</div>
       <ActionBar
         summary={selecionados.length ? moeda(total) : "Nenhum serviço"}
         detail={selecionados.length ? `${selecionados.map((s) => s.nome).join(" + ")} · ${duracao(tempo)}` : "Toque nos cartões para escolher"}

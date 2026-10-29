@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import * as store from "./lib/store.js";
+import { alternarServico } from "./lib/catalogo.js";
 import { ehFuturo } from "./lib/agenda.js";
 import Home from "./screens/Home.jsx";
 import Servicos from "./screens/Servicos.jsx";
@@ -19,12 +20,22 @@ export default function App() {
   const [rota, setRota] = useState(lerRota);
   const [cliente, setCliente] = useState(store.obterCliente);
   const [meus, setMeus] = useState(null); // null = carregando
+  const [fidelidade, setFidelidade] = useState(null);
+  const [assinatura, setAssinatura] = useState(null);
   const [rascunho, setRascunho] = useState(RASCUNHO_VAZIO);
   const [ultimo, setUltimo] = useState(null);
 
   const recarregarMeus = useCallback(async () => {
     try {
-      setMeus(await store.meusAgendamentos());
+      // O cartão fidelidade nunca derruba a lista de horários (ex.: banco ainda sem a função nova).
+      const [lista, selos, plano] = await Promise.all([
+        store.meusAgendamentos(),
+        store.minhaFidelidade().catch(() => null),
+        store.minhaAssinatura().catch(() => null), // banco sem a função nova: segue sem assinatura
+      ]);
+      setMeus(lista);
+      setFidelidade(selos);
+      setAssinatura(plano);
     } catch {
       setMeus((m) => m ?? []);
     }
@@ -63,7 +74,7 @@ export default function App() {
   const toggleServico = (id) =>
     setRascunho((r) => ({
       ...r,
-      servicos: r.servicos.includes(id) ? r.servicos.filter((s) => s !== id) : [...r.servicos, id],
+      servicos: alternarServico(r.servicos, id).servicos, // um corte por vez; extras somam
       hora: null, // a duração mudou; o horário escolhido pode não caber mais
     }));
 
@@ -119,10 +130,12 @@ export default function App() {
         <MeusHorarios
           cliente={cliente}
           meus={meus}
+          fidelidade={fidelidade}
+          assinatura={assinatura}
           navegar={navegar}
           onCancelar={async (id) => { await store.cancelarMeu(id); await recarregarMeus(); }}
           onSalvarCliente={async (c) => setCliente(await store.salvarCliente(c))}
-          onSair={async () => { await store.esquecerCliente(); setCliente(null); setMeus([]); }}
+          onSair={async () => { await store.esquecerCliente(); setCliente(null); setMeus([]); setFidelidade(null); setAssinatura(null); }}
         />
       );
     case "/equipe":
@@ -132,6 +145,8 @@ export default function App() {
         <Home
           cliente={cliente}
           proximo={proximo}
+          fidelidade={fidelidade}
+          assinatura={assinatura}
           navegar={navegar}
           onEscolher={(barbeiroId) => {
             // Trocar de barbeiro mantém os serviços já escolhidos, mas não o horário.

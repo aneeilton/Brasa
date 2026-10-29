@@ -69,7 +69,8 @@ const minutosPorDia = () =>
 
 export const HORAS_PICO = FUNCIONAMENTO.periodos.flatMap((p) => {
   const h = [];
-  for (let t = paraMin(p.inicio); t < paraMin(p.fim); t += 60) h.push(t / 60);
+  const ate = p.ultimoInicio ? paraMin(p.ultimoInicio) + 1 : paraMin(p.fim);
+  for (let t = paraMin(p.inicio); t < ate; t += 60) h.push(t / 60);
   return h;
 });
 

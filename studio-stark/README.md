@@ -36,7 +36,7 @@ Na Vercel/Netlify, aponte o *Root Directory* para `studio-stark/`.
 
 ## Ligar ao Supabase (agenda compartilhada)
 
-Sem configuração o app roda em **modo demonstração** (dados só no aparelho, PIN `1234`).
+O app já vem ligado ao Supabase (endereço e chave pública em `src/config.js`). Para rodar em **modo demonstração** (dados só no aparelho, PIN `1234`), use `npx vite --mode demo`.
 Para valer de verdade:
 
 1. **Banco:** no projeto Supabase → *SQL Editor* → *New query* → cole todo o
