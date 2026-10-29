@@ -227,7 +227,13 @@ export async function entrarEquipe({ email, senha, pin, pinCorreto }) {
     if (error.code === "invalid_credentials")
       throw new Error("E-mail ou senha incorretos. Confira se o usuário existe em Authentication → Users e se a senha está certa.");
     if (error.status === 429) throw new Error("Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.");
-    throw new Error("Não foi possível entrar agora. Verifique sua internet e tente de novo.");
+    // Sem resposta do servidor: rede/operadora bloqueando, VPN, bloqueador ou site antigo.
+    // Mostra o servidor e o motivo para dar para diagnosticar por um print.
+    const host = (() => { try { return new URL(URL_SB).host; } catch { return String(URL_SB); } })();
+    throw new Error(
+      `Não foi possível falar com o servidor (${host}). Tente no Wi-Fi ou nos dados móveis, ` +
+      `desative VPN/bloqueador e confira se o link é o mais recente. [${error.name || "erro"}: ${error.message || error.status || "sem detalhe"}]`
+    );
   }
   const { data: ok } = await sb.rpc("is_equipe");
   if (!ok) {
