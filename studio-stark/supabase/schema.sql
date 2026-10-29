@@ -354,6 +354,151 @@ begin
     group by c.whatsapp;
 end $$;
 
+-- ---------- Assinaturas mensais (renovação automática) ----------
+-- O ciclo recomeça todo mês no dia em que a assinatura começou; o contador de
+-- usos volta a zero sozinho. Só para de renovar quando o gestor cancela.
+-- Um "uso" = atendimento CONCLUÍDO no ciclo com algum serviço incluído no plano.
+create table if not exists public.planos (
+  id             text primary key,
+  nome           text not null,
+  preco          numeric(8,2) not null check (preco >= 0),
+  usos_por_ciclo int not null check (usos_por_ciclo between 1 and 60),
+  servicos       text[] not null,
+  ativo          boolean not null default true,
+  ordem          int not null default 0
+);
+
+create table if not exists public.assinaturas (
+  id           uuid primary key default gen_random_uuid(),
+  whatsapp     text not null check (whatsapp ~ '^\d{10,11}$'),
+  nome         text not null,
+  plano_id     text not null references public.planos(id),
+  inicio       date not null default ((now() at time zone 'America/Bahia')::date),
+  ativa        boolean not null default true,
+  cancelada_em timestamptz,
+  criada_em    timestamptz not null default now()
+);
+-- No máximo uma assinatura ativa por cliente (WhatsApp).
+create unique index if not exists assinatura_ativa_por_whatsapp on public.assinaturas (whatsapp) where ativa;
+
+alter table public.planos      enable row level security;
+alter table public.assinaturas enable row level security;
+
+drop policy if exists "planos publicos" on public.planos;
+create policy "planos publicos" on public.planos
+  for select to anon, authenticated using (ativo or (select public.is_equipe()));
+drop policy if exists "gestor gerencia planos" on public.planos;
+create policy "gestor gerencia planos" on public.planos
+  for all to authenticated using ((select public.is_gestor())) with check ((select public.is_gestor()));
+
+drop policy if exists "equipe le assinaturas" on public.assinaturas;
+create policy "equipe le assinaturas" on public.assinaturas
+  for select to authenticated using ((select public.is_equipe()));
+drop policy if exists "gestor gerencia assinaturas" on public.assinaturas;
+create policy "gestor gerencia assinaturas" on public.assinaturas
+  for all to authenticated using ((select public.is_gestor())) with check ((select public.is_gestor()));
+
+-- Ciclo atual de uma assinatura: [ciclo_inicio, ciclo_fim).
+create or replace function public._ciclo(p_inicio date, p_hoje date, out ciclo_inicio date, out ciclo_fim date)
+language plpgsql immutable set search_path = ''
+as $$
+declare
+  m int := greatest(0, (extract(year from age(p_hoje, p_inicio)) * 12 + extract(month from age(p_hoje, p_inicio)))::int);
+begin
+  if (p_inicio + make_interval(months => m + 1))::date <= p_hoje then m := m + 1; end if;
+  ciclo_inicio := (p_inicio + make_interval(months => m))::date;
+  ciclo_fim    := (p_inicio + make_interval(months => m + 1))::date;
+end $$;
+
+-- Situação de uma assinatura (uso no ciclo atual).
+create or replace function public._resumo_assinatura(a public.assinaturas)
+returns json
+language sql stable security definer set search_path = ''
+as $$
+  select json_build_object(
+    'id', a.id, 'whatsapp', a.whatsapp, 'nome', a.nome, 'inicio', a.inicio, 'ativa', a.ativa,
+    'planoId', p.id, 'plano', p.nome, 'preco', p.preco, 'limite', p.usos_por_ciclo,
+    'cicloInicio', c.ciclo_inicio, 'renovaEm', c.ciclo_fim,
+    'usos', (select count(*) from public.agendamentos ag
+             join public.clientes cl on cl.id = ag.cliente_id
+             where cl.whatsapp = a.whatsapp and ag.status = 'concluido'
+               and ag.inicio >= c.ciclo_inicio and ag.inicio < c.ciclo_fim
+               and ag.servicos && p.servicos)
+  )
+  from public.planos p,
+       public._ciclo(a.inicio, public.agora_local()::date) c
+  where p.id = a.plano_id;
+$$;
+
+-- Cliente: a própria assinatura ativa (ou null).
+create or replace function public.minha_assinatura(p_token uuid)
+returns json
+language sql stable security definer set search_path = ''
+as $$
+  select public._resumo_assinatura(a)
+  from public.clientes eu
+  join public.assinaturas a on a.whatsapp = eu.whatsapp and a.ativa
+  where eu.token = p_token
+  limit 1;
+$$;
+
+-- Equipe: todas as assinaturas ativas, com o uso do ciclo.
+create or replace function public.assinaturas_equipe()
+returns json
+language plpgsql stable security definer set search_path = ''
+as $$
+begin
+  if not public.is_equipe() then raise exception 'SEM_PERMISSAO'; end if;
+  return coalesce((select json_agg(public._resumo_assinatura(a) order by a.nome)
+                   from public.assinaturas a where a.ativa), '[]'::json);
+end $$;
+
+-- ---------- Gestor: editar agendamento ----------
+-- Recalcula duração, total e nomes pelos serviços; o banco ainda impede
+-- dois agendamentos no mesmo horário do mesmo barbeiro.
+create or replace function public.editar_agendamento(
+  p_id uuid, p_barbeiro text, p_inicio timestamp, p_servicos text[], p_status text
+)
+returns json
+language plpgsql volatile security definer set search_path = ''
+as $$
+declare
+  v_ag public.agendamentos; v_cli public.clientes;
+  v_dur int; v_total numeric; v_nomes text[]; v_qtd int;
+begin
+  if not public.is_gestor() then raise exception 'SEM_PERMISSAO'; end if;
+  if p_status not in ('confirmado', 'concluido', 'cancelado', 'faltou') then raise exception 'STATUS_INVALIDO'; end if;
+  if not exists (select 1 from public.barbeiros where id = p_barbeiro) then raise exception 'BARBEIRO_INVALIDO'; end if;
+  if extract(minute from p_inicio)::int % 5 <> 0 then raise exception 'FORA_DO_HORARIO'; end if;
+
+  select sum(s.duracao), sum(s.preco), array_agg(s.nome order by x.ord), count(*)
+    into v_dur, v_total, v_nomes, v_qtd
+  from unnest(p_servicos) with ordinality as x(id, ord)
+  join public.servicos s on s.id = x.id;
+  if coalesce(v_qtd, 0) = 0 or v_qtd <> cardinality(p_servicos)
+     or cardinality(p_servicos) <> (select count(distinct u) from unnest(p_servicos) u) then
+    raise exception 'SERVICO_INVALIDO';
+  end if;
+  if (select count(*) from public.servicos s
+      where s.id = any (p_servicos) and s.categoria in ('Cortes', 'Combos')) > 1 then
+    raise exception 'MAIS_DE_UM_CORTE';
+  end if;
+
+  begin
+    update public.agendamentos
+       set barbeiro_id = p_barbeiro, inicio = p_inicio, fim = p_inicio + make_interval(mins => v_dur),
+           servicos = p_servicos, servicos_nomes = v_nomes, total = v_total, status = p_status
+     where id = p_id
+     returning * into v_ag;
+  exception when exclusion_violation then
+    raise exception 'HORARIO_OCUPADO';
+  end;
+  if not found then raise exception 'NAO_ENCONTRADO'; end if;
+
+  select * into v_cli from public.clientes where id = v_ag.cliente_id;
+  return public._agendamento_json(v_ag, v_cli);
+end $$;
+
 -- Permissões: só as funções públicas ficam acessíveis ao app.
 revoke all on function public.is_equipe() from public;
 revoke all on function public.agora_local() from public;
@@ -372,6 +517,14 @@ revoke all on function public.minha_fidelidade(uuid) from public;
 grant execute on function public.minha_fidelidade(uuid) to anon, authenticated;
 revoke all on function public.fidelidade_clientes(text[]) from public;
 grant execute on function public.fidelidade_clientes(text[]) to authenticated;
+revoke all on function public._ciclo(date, date) from public, anon, authenticated;
+revoke all on function public._resumo_assinatura(public.assinaturas) from public, anon, authenticated;
+revoke all on function public.minha_assinatura(uuid) from public;
+grant execute on function public.minha_assinatura(uuid) to anon, authenticated;
+revoke all on function public.assinaturas_equipe() from public;
+grant execute on function public.assinaturas_equipe() to authenticated;
+revoke all on function public.editar_agendamento(uuid, text, timestamp, text[], text) from public;
+grant execute on function public.editar_agendamento(uuid, text, timestamp, text[], text) to authenticated;
 grant execute on function public.horarios_ocupados(date, date) to anon, authenticated;
 grant execute on function public.criar_agendamento(uuid, text, text, text, text, timestamp, text[]) to anon, authenticated;
 grant execute on function public.meus_agendamentos(uuid) to anon, authenticated;
@@ -405,6 +558,18 @@ insert into public.servicos (id, categoria, nome, descricao, preco, duracao, ord
   ('hidratacao',              'Tratamentos',        'Hidratação',                  null, 20, 10, 41),
   ('botox',                   'Tratamentos',        'Botox',                       null, 60, 40, 42),
   ('nevou',                   'Tratamentos',        'Nevou', 'Pintura do cabelo na cor branca', 100, 45, 43)
+on conflict (id) do nothing;
+
+-- Planos de assinatura (edite à vontade em Table Editor → planos):
+-- usos_por_ciclo = quantos atendimentos por mês; servicos = o que conta como uso.
+insert into public.planos (id, nome, preco, usos_por_ciclo, servicos, ordem) values
+  ('ass-corte',       'Assinatura Corte',         89.90, 4,
+     array['degrade','tesoura','navalhado','corte-sobrancelha','corte-bigode','navalhado-sobrancelha'], 1),
+  ('ass-barba',       'Assinatura Barba',         69.90, 4,
+     array['barba'], 2),
+  ('ass-corte-barba', 'Assinatura Corte + Barba', 149.90, 4,
+     array['degrade','tesoura','navalhado','corte-sobrancelha','corte-bigode','navalhado-sobrancelha',
+           'corte-barba','corte-barba-sobrancelha','barba'], 3)
 on conflict (id) do nothing;
 
 -- Equipe com acesso à agenda (o login é criado em Authentication → Users).

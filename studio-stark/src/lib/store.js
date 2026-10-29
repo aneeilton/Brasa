@@ -6,9 +6,11 @@
    As telas usam apenas as funções exportadas aqui.
    ============================================================ */
 import { createClient } from "@supabase/supabase-js";
-import { SUPABASE } from "../config.js";
+import { PLANOS, SUPABASE } from "../config.js";
 import { definirCategorias, servicoPorId } from "./catalogo.js";
-import { paraMin } from "./format.js";
+import { isoData, paraMin } from "./format.js";
+import { resumoAssinatura } from "./assinatura.js";
+import { agoraNaBarbearia } from "./agenda.js";
 
 // Modo demonstração (sem banco) só em desenvolvimento local com VITE_DEMO=1 ou --mode demo.
 const DEMO = import.meta.env.MODE === "demo" || import.meta.env.VITE_DEMO === "1";
@@ -21,6 +23,7 @@ export const remoto = !!sb;
 const K_CLIENTE = "stark.cliente";
 const K_AGENDAMENTOS = "stark.agendamentos";
 const K_EQUIPE_PIN = "stark.equipe";
+const K_ASSINATURAS = "stark.assinaturas";
 
 const ler = (k, padrao) => {
   try {
@@ -44,6 +47,9 @@ const MENSAGENS = {
   FORA_DO_HORARIO: "Esse horário está fora do funcionamento da barbearia.",
   FORA_DO_PRAZO: "Esse horário não está mais disponível. Escolha outro, por favor.",
   LIMITE_AGENDAMENTOS: "Você já tem 3 horários marcados. Para marcar outro, cancele um em “Meus horários”.",
+  SEM_PERMISSAO: "Só o gestor pode fazer isso.",
+  STATUS_INVALIDO: "Situação inválida para o agendamento.",
+  ASSINATURA_DUPLICADA: "Esse cliente já tem uma assinatura ativa. Cancele a atual antes de criar outra.",
   MAIS_DE_UM_CORTE: "Escolha só um corte por agendamento. Volte e ajuste os serviços.",
   SERVICO_INVALIDO: "Algum serviço escolhido não está mais disponível. Volte e escolha de novo.",
   BARBEIRO_INVALIDO: "Esse barbeiro não está disponível no momento.",
@@ -292,6 +298,78 @@ export async function atualizarStatus(id, status) {
   if (!sb) return atualizarLocal(id, status);
   const { error } = await sb.from("agendamentos").update({ status }).eq("id", id);
   if (error) throw erro(error);
+}
+
+/* ---------- Assinaturas ---------- */
+const normalizarAssinatura = (a) => a && ({ ...a, preco: Number(a.preco), limite: Number(a.limite), usos: Number(a.usos) });
+const hojeIso = () => isoData(agoraNaBarbearia());
+const planoLocal = (id) => PLANOS.find((p) => p.id === id);
+const resumosLocais = () =>
+  ler(K_ASSINATURAS, []).filter((a) => a.ativa)
+    .map((a) => resumoAssinatura(a, planoLocal(a.planoId), ler(K_AGENDAMENTOS, []), hojeIso()));
+
+export async function listarPlanos() {
+  if (!sb) return PLANOS;
+  const { data, error } = await sb.from("planos").select("*").order("ordem");
+  if (error || !data?.length) return PLANOS;
+  return data.map((p) => ({ id: p.id, nome: p.nome, preco: Number(p.preco), limite: p.usos_por_ciclo, servicos: p.servicos }));
+}
+
+/* Cliente: a própria assinatura ativa (ou null). */
+export async function minhaAssinatura() {
+  const c = obterCliente();
+  if (!c) return null;
+  if (sb) return c.token ? normalizarAssinatura(await rpc("minha_assinatura", { p_token: c.token })) : null;
+  return resumosLocais().find((a) => a.whatsapp === c.whatsapp) ?? null;
+}
+
+/* Equipe: assinaturas ativas com o uso do ciclo. */
+export async function assinaturasEquipe() {
+  if (!sb) return resumosLocais();
+  return ((await rpc("assinaturas_equipe")) ?? []).map(normalizarAssinatura);
+}
+
+export async function salvarAssinatura({ whatsapp, nome, planoId, inicio }) {
+  if (sb) {
+    const { error } = await sb.from("assinaturas").insert({ whatsapp, nome: nome.trim(), plano_id: planoId, inicio });
+    if (error?.code === "23505") throw erro({ message: "ASSINATURA_DUPLICADA" });
+    if (error) throw erro(error.code === "42501" ? { message: "SEM_PERMISSAO" } : error);
+    return;
+  }
+  const todas = ler(K_ASSINATURAS, []);
+  if (todas.some((a) => a.ativa && a.whatsapp === whatsapp)) throw erro({ message: "ASSINATURA_DUPLICADA" });
+  gravar(K_ASSINATURAS, [...todas, { id: crypto.randomUUID?.() ?? String(Date.now()), whatsapp, nome: nome.trim(), planoId, inicio, ativa: true }]);
+}
+
+/* Cancela a renovação: a assinatura deixa de contar a partir de agora. */
+export async function cancelarAssinatura(id) {
+  if (sb) {
+    const { error } = await sb.from("assinaturas").update({ ativa: false, cancelada_em: new Date().toISOString() }).eq("id", id);
+    if (error) throw erro(error);
+    return;
+  }
+  gravar(K_ASSINATURAS, ler(K_ASSINATURAS, []).map((a) => (a.id === id ? { ...a, ativa: false } : a)));
+}
+
+/* ---------- Gestor: editar agendamento ---------- */
+export async function editarAgendamento({ id, barbeiroId, data, hora, servicos, status }) {
+  if (sb) {
+    return normalizar(await rpc("editar_agendamento", {
+      p_id: id, p_barbeiro: barbeiroId, p_inicio: `${data}T${hora}:00`, p_servicos: servicos, p_status: status,
+    }));
+  }
+  const itens = servicos.map(servicoPorId);
+  const duracao = itens.reduce((s, x) => s + x.duracao, 0);
+  const todos = ler(K_AGENDAMENTOS, []);
+  const ini = paraMin(hora);
+  if (status !== "cancelado" && todos.some((a) => a.id !== id && a.status !== "cancelado" && a.barbeiroId === barbeiroId &&
+      a.data === data && ini < paraMin(a.hora) + a.duracao && paraMin(a.hora) < ini + duracao)) {
+    throw erro({ message: "HORARIO_OCUPADO" });
+  }
+  gravar(K_AGENDAMENTOS, todos.map((a) => (a.id === id ? {
+    ...a, barbeiroId, data, hora, servicos, duracao, status,
+    servicosNomes: itens.map((s) => s.nome), total: itens.reduce((s, x) => s + x.preco, 0),
+  } : a)));
 }
 
 function atualizarLocal(id, status) {

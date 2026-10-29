@@ -602,3 +602,66 @@ dialog p { font-size: 15px; color: var(--label-2); margin: 0 0 20px; }
   transition: opacity 0.2s, transform 0.25s var(--ease);
 }
 .toast[data-on="true"] { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============================================================
+   Assinatura mensal — progresso de uso do ciclo (ex.: 2/4)
+   ============================================================ */
+.ass {
+  margin-top: 16px; padding: 18px 16px 14px; border-radius: var(--r-lg);
+  background: var(--surface); box-shadow: var(--shadow); border: 1.5px solid var(--ink);
+}
+.ass-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.ass-tag { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--success); }
+.ass-titulo { margin: 2px 0 0; font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.ass-n { font-family: var(--font-display); font-size: 34px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; white-space: nowrap; }
+.ass-n span { font-size: 18px; color: var(--label-2); font-weight: 600; }
+.ass-sub { margin: 10px 0 0; font-size: 14px; }
+.ass-nota { margin: 4px 0 0; font-size: 12px; color: var(--label-2); }
+
+.ass-barra { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; margin-top: 14px; }
+.ass-barra span { height: 10px; border-radius: 5px; background: var(--fill); transition: background-color 0.3s; }
+.ass-barra span[data-on="true"] { background: var(--ink); }
+.ass-barra-claro { margin-top: 8px; }
+.ass-barra-claro span { height: 6px; border-radius: 3px; }
+.fid-atalho .ass-barra { width: 56px; flex: none; margin: 0; }
+
+.ass-badge { color: var(--success); }
+.ass-badge-fim { color: var(--danger); }
+
+.ass-resumo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.planos { display: grid; gap: 8px; }
+.plano {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left;
+  padding: 12px 14px; border-radius: var(--r-md); border: 1.5px solid var(--separator); background: var(--surface);
+}
+.plano[aria-checked="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.plano-nome { font-weight: 600; }
+.plano-meta { font-size: 13px; color: var(--label-2); }
+
+/* ============================================================
+   Janela de formulário (editar agendamento)
+   ============================================================ */
+dialog.dialog-form {
+  text-align: left; width: min(520px, calc(100% - 24px)); max-height: calc(100dvh - 32px); overflow: auto;
+  padding: 20px 18px 18px;
+}
+.dialog-head h2 { font-size: 20px; margin: 0; font-family: var(--font-display); letter-spacing: -0.02em; }
+.dialog-head p { margin: 2px 0 14px; }
+.ed-label { display: block; font-size: 13px; font-weight: 600; color: var(--label-2); margin-bottom: 6px; }
+.ed-dica { font-weight: 400; }
+.ed-linha { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.ed-campo { display: block; }
+.ed-campo input, .ed-campo select {
+  width: 100%; min-height: 44px; padding: 0 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--separator); background: var(--surface-2); color: var(--label); font-size: 16px;
+}
+.ed-servicos { display: grid; gap: 10px; }
+.ed-servicos fieldset { border: 0; margin: 0; padding: 0; }
+.ed-servicos legend { font-size: 12px; color: var(--label-3); margin-bottom: 6px; padding: 0; }
+.ed-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ed-chip {
+  min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--separator);
+  background: var(--surface); font-size: 14px;
+}
+.ed-chip[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); border-color: var(--ink); font-weight: 600; }
+.ed-resumo { margin-top: 14px; padding: 12px 14px; border-radius: var(--r-md); background: var(--fill); font-size: 15px; }

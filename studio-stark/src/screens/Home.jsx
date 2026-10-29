@@ -2,6 +2,7 @@ import logo from "../assets/logo.svg";
 import { BARBEARIA, BARBEIROS, FIDELIDADE_META, FUNCIONAMENTO, barbeiroPorId } from "../config.js";
 import { ChevronRight, Clock, Pin, Calendar, Chat } from "../components/Icons.jsx";
 import { linkBarbearia } from "../lib/whatsapp.js";
+import { UsosAssinatura } from "../components/Assinatura.jsx";
 import { TopBar } from "../components/UI.jsx";
 import { capitalizar, dataLonga, mascaraTelefone, primeiroNome } from "../lib/format.js";
 
@@ -11,7 +12,7 @@ const faixaDias = () => {
   return `${capitalizar(DIAS[d[0]])} a ${DIAS[d[d.length - 1]]}`;
 };
 
-export default function Home({ cliente, proximo, fidelidade, onEscolher, navegar }) {
+export default function Home({ cliente, proximo, fidelidade, assinatura, onEscolher, navegar }) {
   return (
     <>
       <TopBar
@@ -27,6 +28,13 @@ export default function Home({ cliente, proximo, fidelidade, onEscolher, navegar
           <p className="subhead">Escolha com quem você quer cortar.</p>
         </div>
 
+        {cliente && assinatura && (
+          <button className="fid-atalho" onClick={() => navegar("/meus")} aria-label={`${assinatura.plano}: ${Math.min(assinatura.usos, assinatura.limite)} de ${assinatura.limite} atendimentos usados neste ciclo`}>
+            <UsosAssinatura usos={assinatura.usos} limite={assinatura.limite} claro />
+            <span className="fid-atalho-txt">{assinatura.plano} <strong className="tabular">{Math.min(assinatura.usos, assinatura.limite)}/{assinatura.limite}</strong></span>
+            <ChevronRight />
+          </button>
+        )}
         {cliente && fidelidade != null && (
           <button className="fid-atalho" onClick={() => navegar("/meus")} aria-label={`Cartão fidelidade: ${Math.min(fidelidade, FIDELIDADE_META)} de ${FIDELIDADE_META} atendimentos`}>
             <span className="fid-mini" aria-hidden="true">

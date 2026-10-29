@@ -21,15 +21,21 @@ export default function App() {
   const [cliente, setCliente] = useState(store.obterCliente);
   const [meus, setMeus] = useState(null); // null = carregando
   const [fidelidade, setFidelidade] = useState(null);
+  const [assinatura, setAssinatura] = useState(null);
   const [rascunho, setRascunho] = useState(RASCUNHO_VAZIO);
   const [ultimo, setUltimo] = useState(null);
 
   const recarregarMeus = useCallback(async () => {
     try {
       // O cartão fidelidade nunca derruba a lista de horários (ex.: banco ainda sem a função nova).
-      const [lista, selos] = await Promise.all([store.meusAgendamentos(), store.minhaFidelidade().catch(() => null)]);
+      const [lista, selos, plano] = await Promise.all([
+        store.meusAgendamentos(),
+        store.minhaFidelidade().catch(() => null),
+        store.minhaAssinatura().catch(() => null), // banco sem a função nova: segue sem assinatura
+      ]);
       setMeus(lista);
       setFidelidade(selos);
+      setAssinatura(plano);
     } catch {
       setMeus((m) => m ?? []);
     }
@@ -125,10 +131,11 @@ export default function App() {
           cliente={cliente}
           meus={meus}
           fidelidade={fidelidade}
+          assinatura={assinatura}
           navegar={navegar}
           onCancelar={async (id) => { await store.cancelarMeu(id); await recarregarMeus(); }}
           onSalvarCliente={async (c) => setCliente(await store.salvarCliente(c))}
-          onSair={async () => { await store.esquecerCliente(); setCliente(null); setMeus([]); setFidelidade(null); }}
+          onSair={async () => { await store.esquecerCliente(); setCliente(null); setMeus([]); setFidelidade(null); setAssinatura(null); }}
         />
       );
     case "/equipe":
@@ -139,6 +146,7 @@ export default function App() {
           cliente={cliente}
           proximo={proximo}
           fidelidade={fidelidade}
+          assinatura={assinatura}
           navegar={navegar}
           onEscolher={(barbeiroId) => {
             // Trocar de barbeiro mantém os serviços já escolhidos, mas não o horário.

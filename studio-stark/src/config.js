@@ -110,6 +110,16 @@ export const FIDELIDADE_META = 12;
    Os nomes precisam bater com a coluna `categoria` da tabela `servicos`. */
 export const CATEGORIAS_UM_CORTE = ["Cortes", "Combos"];
 
+/* Planos de assinatura (modo demonstração; com o Supabase ligado vêm da tabela `planos`).
+   limite = atendimentos por ciclo mensal; servicos = o que conta como uso. */
+const CORTES_ASSINATURA = ["degrade", "tesoura", "navalhado", "corte-sobrancelha", "corte-bigode", "navalhado-sobrancelha"];
+export const PLANOS = [
+  { id: "ass-corte", nome: "Assinatura Corte", preco: 89.9, limite: 4, servicos: CORTES_ASSINATURA },
+  { id: "ass-barba", nome: "Assinatura Barba", preco: 69.9, limite: 4, servicos: ["barba"] },
+  { id: "ass-corte-barba", nome: "Assinatura Corte + Barba", preco: 149.9, limite: 4,
+    servicos: [...CORTES_ASSINATURA, "corte-barba", "corte-barba-sobrancelha", "barba"] },
+];
+
 export const barbeiroPorId = (id) => BARBEIROS.find((b) => b.id === id);
 
 /* PIN da área da equipe — usado só no modo local (sem Supabase).

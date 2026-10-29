@@ -6,6 +6,7 @@ import { baixarConvite } from "../lib/calendario.js";
 import { capitalizar, dataLonga, mascaraTelefone, moeda } from "../lib/format.js";
 import { ehFuturo } from "../lib/agenda.js";
 import { CartaoFidelidade } from "../components/Fidelidade.jsx";
+import { CartaoAssinatura } from "../components/Assinatura.jsx";
 
 function Cartao({ ag, onCancelar }) {
   const futuro = ag.status === "confirmado" && ehFuturo(ag);
@@ -35,7 +36,7 @@ function Cartao({ ag, onCancelar }) {
   );
 }
 
-export default function MeusHorarios({ cliente, meus, fidelidade, onCancelar, onSalvarCliente, onSair, navegar }) {
+export default function MeusHorarios({ cliente, meus, fidelidade, assinatura, onCancelar, onSalvarCliente, onSair, navegar }) {
   const [cancelando, setCancelando] = useState(null);
   const [editando, setEditando] = useState(false);
   const [saindo, setSaindo] = useState(false);
@@ -72,6 +73,7 @@ export default function MeusHorarios({ cliente, meus, fidelidade, onCancelar, on
           </div>
         ) : (
           <>
+            {assinatura && <CartaoAssinatura a={assinatura} />}
             {fidelidade != null && <CartaoFidelidade concluidos={fidelidade} />}
 
             <h2 className="section-header">Próximos</h2>

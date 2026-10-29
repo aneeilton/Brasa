@@ -9,6 +9,9 @@ import { capitalizar, dataLonga, deMin, isoData, mascaraTelefone, moeda, paraMin
 import { linkLembrete } from "../lib/whatsapp.js";
 import Painel from "./Painel.jsx";
 import { SeloFidelidade } from "../components/Fidelidade.jsx";
+import { SeloAssinatura } from "../components/Assinatura.jsx";
+import EditarAgendamento from "../components/EditarAgendamento.jsx";
+import Assinantes from "./Assinantes.jsx";
 
 function Login({ onOk }) {
   const [email, setEmail] = useState("");
@@ -78,6 +81,8 @@ export default function Equipe({ navegar }) {
   const [falha, setFalha] = useState(null);
   const [cancelando, setCancelando] = useState(null);
   const [selos, setSelos] = useState({});
+  const [assinantes, setAssinantes] = useState({});
+  const [editando, setEditando] = useState(null);
   const [gestor, setGestor] = useState(false);
   const [aba, setAba] = useState(() => sessionStorage.getItem("stark.aba") || "agenda");
 
@@ -95,6 +100,14 @@ export default function Equipe({ navegar }) {
     sessionStorage.setItem("stark.aba", a);
   };
   const vendoPainel = gestor && aba === "painel";
+  const vendoAssinantes = gestor && aba === "assinantes";
+
+  // Assinaturas ativas (para a etiqueta "Assinante 2/4" na agenda).
+  const carregarAssinantes = useCallback(() => {
+    store.assinaturasEquipe()
+      .then((l) => setAssinantes(Object.fromEntries(l.map((a) => [a.whatsapp, a]))))
+      .catch(() => {});
+  }, []);
 
   const carregar = useCallback(async () => {
     setFalha(null);
@@ -103,14 +116,15 @@ export default function Equipe({ navegar }) {
       setLista(doDia);
       // Selos do cartão fidelidade de cada cliente do dia (não trava a agenda se falhar).
       store.fidelidadeClientes(doDia.map((a) => a.cliente?.whatsapp)).then(setSelos).catch(() => {});
+      carregarAssinantes();
     } catch (e) {
       setFalha(e.message);
     }
-  }, [dia]);
+  }, [dia, carregarAssinantes]);
 
   // Atualiza ao trocar de dia, a cada minuto e quando o app volta ao primeiro plano.
   useEffect(() => {
-    if (!liberado || vendoPainel) return;
+    if (!liberado || vendoPainel || vendoAssinantes) return;
     setLista(null);
     carregar();
     const t = setInterval(carregar, 60_000);
@@ -120,7 +134,7 @@ export default function Equipe({ navegar }) {
       clearInterval(t);
       document.removeEventListener("visibilitychange", aoVoltar);
     };
-  }, [liberado, vendoPainel, carregar]);
+  }, [liberado, vendoPainel, vendoAssinantes, carregar]);
 
   const mudarStatus = async (id, status) => {
     try {
@@ -148,10 +162,10 @@ export default function Equipe({ navegar }) {
         )}
       />
       <main className="page screen">
-        <ScreenTitle>{vendoPainel ? "Painel do negócio" : "Agenda da equipe"}</ScreenTitle>
+        <ScreenTitle>{vendoPainel ? "Painel do negócio" : vendoAssinantes ? "Assinantes" : "Agenda da equipe"}</ScreenTitle>
         {liberado && gestor && (
           <div className="segmented abas" role="tablist" aria-label="Área da equipe">
-            {[["agenda", "Agenda"], ["painel", "Painel"]].map(([k, r]) => (
+            {[["agenda", "Agenda"], ["assinantes", "Assinantes"], ["painel", "Painel"]].map(([k, r]) => (
               <button key={k} role="tab" aria-selected={aba === k} aria-pressed={aba === k} onClick={() => trocarAba(k)}>{r}</button>
             ))}
           </div>
@@ -160,6 +174,8 @@ export default function Equipe({ navegar }) {
           <Login onOk={() => setLiberado(true)} />
         ) : vendoPainel ? (
           <Painel irParaAgenda={() => trocarAba("agenda")} />
+        ) : vendoAssinantes ? (
+          <Assinantes aoMudar={carregarAssinantes} />
         ) : (
           <>
             <div className="segmented" role="group" aria-label="Filtrar por barbeiro">
@@ -197,6 +213,7 @@ export default function Equipe({ navegar }) {
                       <div className="row-title" style={{ fontWeight: 600 }}>
                         {a.cliente.nome}{" "}
                         <SeloFidelidade concluidos={selos[a.cliente.whatsapp] ?? 0} />{" "}
+                        <SeloAssinatura a={assinantes[a.cliente.whatsapp]} />{" "}
                         {a.status === "concluido" && <span className="badge badge-ok">Concluído</span>}
                         {a.status === "cancelado" && <span className="badge badge-no">Cancelado</span>}
                         {a.status === "faltou" && <span className="badge badge-no">Faltou</span>}
@@ -205,14 +222,17 @@ export default function Equipe({ navegar }) {
                       <div className="row-sub tabular">
                         {filtro === "todos" && `${barbeiroPorId(a.barbeiroId)?.nome} · `}{mascaraTelefone(a.cliente.whatsapp)} · {moeda(a.total)}
                       </div>
-                      {a.status === "confirmado" && (
+                      {(a.status === "confirmado" || gestor) && (
                         <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+                          {a.status === "confirmado" && <>
                           <a className="btn btn-sm btn-secondary" href={linkLembrete(a)} target="_blank" rel="noreferrer">
                             <Chat size={16} /> Lembrete
                           </a>
                           <button className="btn btn-sm btn-secondary" onClick={() => mudarStatus(a.id, "concluido")}>Concluir</button>
                           <button className="btn btn-sm btn-secondary" onClick={() => mudarStatus(a.id, "faltou")}>Faltou</button>
                           <button className="btn btn-sm btn-danger" onClick={() => setCancelando(a)}>Cancelar</button>
+                          </>}
+                          {gestor && <button className="btn btn-sm btn-secondary" onClick={() => setEditando(a)}>Editar</button>}
                         </div>
                       )}
                     </div>
@@ -226,6 +246,11 @@ export default function Equipe({ navegar }) {
           </>
         )}
       </main>
+      <EditarAgendamento
+        ag={editando}
+        onFechar={() => setEditando(null)}
+        onSalvo={async () => { setEditando(null); await carregar(); }}
+      />
       <Confirm
         open={!!cancelando}
         destructive
